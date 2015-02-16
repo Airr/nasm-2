@@ -1,3 +1,7 @@
+.PHONY: all
+.PHONY: debug
+.PHONY: clean
+
 NAME=structmsg
 AS=nasm
 LD=ld
@@ -7,22 +11,24 @@ ASM         = .asm
 INC         = .inc
 LST         = .lst
 
-ASFLAGS     = -felf64
+ASFLAGS     = "-felf64"
 LDFLAGS     = -s -melf_x86_64
 
-OBJS = $(NAME)$(O)
+OBJS = $(NAME)$(O) ../../archive/libmodulo97.a
 
 $(NAME): $(OBJS)
 	$(LD) $(LDFLAGS) -o $(NAME) $(OBJS) $(LIBS)
 
 $(NAME)$(O): $(NAME)$(ASM)
 	$(AS) $(ASFLAGS) $(NAME)$(ASM) -l $(NAME)$(LST) -o $(NAME)$(O)
-all:
+again:
+	make clean
 	touch $(NAME)$(ASM)
 	$(MAKE) $(NAME)
+	
 debug:
 	touch $(NAME)$(ASM)
 	$(MAKE) $(NAME) ASFLAGS="-felf64 -Fstabs -g" LDFLAGS="-g -melf_x86_64"
 	valgrind --tool=callgrind --dump-instr=yes --collect-jumps=yes ./$(NAME)
 clean:
-	rm *.out.* $(NAME) $(NAME)$(LST) $(NAME)$(O)
+	@rm -f *.out.* $(NAME) $(NAME)$(LST) $(NAME)$(O)
