@@ -119,7 +119,7 @@ Modulo97.Check:
      mov       rax, rdi
      mov       rbx, 100
      xor       rdx, rdx
-     idiv      rbx                 ; RDX = quotient, RAX = remainder
+     div       rbx                 ; RDX = quotient, RAX = remainder
      mov       rcx, rdx            ; store checkdigits
      mov       rdi, rax
      call      Modulo97.Calculate     
@@ -137,6 +137,6 @@ Modulo97.Calculate:
      mov       rax, rdi
      mov       rbx, 97
      xor       rdx, rdx
-     idiv      rbx
+     div       rbx
      mov       rax, rdx
      ret

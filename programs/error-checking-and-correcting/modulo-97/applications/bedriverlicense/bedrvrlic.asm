@@ -12,11 +12,11 @@
      ; RAX has the converted number, we need to extract the last two decimal digits
      xor       rdx, rdx
      mov       rbx, 100
-     idiv      rbx                      ; RDX = checkdigits, RAX = number
+     div       rbx                      ; RDX = checkdigits, RAX = number
      mov       rcx, 97
      sub       rcx, rdx                 ; RCX = 97 - modulo97(number)
      xor       rdx, rdx
-     imul      rbx                      ; RAX = number * 100
+     mul       rbx                      ; RAX = number * 100
      add       rax, rcx                 ; new number to check
      mov       rdi, rax
      call      Modulo97.Check
