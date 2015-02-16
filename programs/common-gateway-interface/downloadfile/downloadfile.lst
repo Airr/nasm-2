@@ -1,0 +1,716 @@
+     1                                  ;***********************************************************************************************
+     2                                  ; Name:		cgi-download.asm
+     3                                  ; Build:	see makefile
+     4                                  ; Description:	cgi program to download a file (logo.png in this example).
+     5                                  ; Remarks:	putting a link in a webpage does the same with less effort. The disadvantage is
+     6                                  ;		that the file to download must be in the http-root directory to be accessable.
+     7                                  ;		a additional directory need to be created ("downloads") where the file ("logo.png"
+     8                                  ;		must be reside in or the program ends in error because the file isn't found.
+     9                                  ;		The program, however, ends with a general error message for all errors.
+    10                                  ;***********************************************************************************************
+    11                                  
+    12                                  %include "syscalls.inc"
+    13                              <1> %ifndef _ASM_SYSCALLS_INC_
+    14                              <1> %define _ASM_SYSCALLS_INC_
+    15                              <1> 
+    16                              <1>   %define SYS_ACCEPT                 43
+    17                              <1>   %define SYS_ACCEPT4                288
+    18                              <1>   %define SYS_ACCESS                 21
+    19                              <1>   %define SYS_ACCT                   163
+    20                              <1>   %define SYS_ADD_KEY                248
+    21                              <1>   %define SYS_ADJTIMEX               159
+    22                              <1>   %define SYS_AFS_SYSCALL            183
+    23                              <1>   %define SYS_ALARM                  37
+    24                              <1>   %define SYS_ARCH_PRCTL             158
+    25                              <1>   %define SYS_BIND                   49
+    26                              <1>   %define SYS_BRK                    12
+    27                              <1>   %define SYS_CAPGET                 125
+    28                              <1>   %define SYS_CAPSET                 126
+    29                              <1>   %define SYS_CHDIR                  80 
+    30                              <1>   %define SYS_CHMOD                  90 
+    31                              <1>   %define SYS_CHOWN                  92 
+    32                              <1>   %define SYS_CHROOT                 161
+    33                              <1>   %define SYS_CLOCK_GETRES           229
+    34                              <1>   %define SYS_CLOCK_GETTIME          228
+    35                              <1>   %define SYS_CLOCK_NANOSLEEP        230
+    36                              <1>   %define SYS_CLOCK_SETTIME          227
+    37                              <1>   %define SYS_CLONE                  56
+    38                              <1>   %define SYS_CLOSE                  3
+    39                              <1>   %define SYS_CONNECT                42
+    40                              <1>   %define SYS_CREAT                  85
+    41                              <1>   %define SYS_CREATE_MODULE          174
+    42                              <1>   %define SYS_DELETE_MODULE          176
+    43                              <1>   %define SYS_DUP                    32
+    44                              <1>   %define SYS_DUP2                   33
+    45                              <1>   %define SYS_DUP3                   292
+    46                              <1>   %define SYS_EPOLL_CREATE           213
+    47                              <1>   %define SYS_EPOLL_CREATE1          291
+    48                              <1>   %define SYS_EPOLL_CTL              233
+    49                              <1>   %define SYS_EPOLL_CTL_OLD          214
+    50                              <1>   %define SYS_EPOLL_PWAIT            281
+    51                              <1>   %define SYS_EPOLL_WAIT             232
+    52                              <1>   %define SYS_EPOLL_WAIT_OLD         215
+    53                              <1>   %define SYS_EVENTFD                284
+    54                              <1>   %define SYS_EVENTFD2               290
+    55                              <1>   %define SYS_EXECVE                 59
+    56                              <1>   %define SYS_EXIT                   60
+    57                              <1>   %define SYS_EXIT_GROUP             231
+    58                              <1>   %define SYS_FACCESSAT              269
+    59                              <1>   %define SYS_FADVISE64              221
+    60                              <1>   %define SYS_FALLOCATE              285
+    61                              <1>   %define SYS_FANOTIFY_INIT          300
+    62                              <1>   %define SYS_FANOTIFY_MARK          301
+    63                              <1>   %define SYS_FCHDIR                 81
+    64                              <1>   %define SYS_FCHMOD                 91
+    65                              <1>   %define SYS_FCHMODAT               268
+    66                              <1>   %define SYS_FCHOWN                 93 
+    67                              <1>   %define SYS_FCHOWNAT               260
+    68                              <1>   %define SYS_FCNTL                  72 
+    69                              <1>   %define SYS_FDATASYNC              75 
+    70                              <1>   %define SYS_FGETXATTR              193
+    71                              <1>   %define SYS_FLISTXATTR             196
+    72                              <1>   %define SYS_FLOCK                  73 
+    73                              <1>   %define SYS_FORK                   57 
+    74                              <1>   %define SYS_FREMOVEXATTR           199
+    75                              <1>   %define SYS_FSETXATTR              190
+    76                              <1>   %define SYS_FSTAT                  5  
+    77                              <1>   %define SYS_FSTATFS                138
+    78                              <1>   %define SYS_FSYNC                  74 
+    79                              <1>   %define SYS_FTRUNCATE              77 
+    80                              <1>   %define SYS_FUTEX                  202
+    81                              <1>   %define SYS_FUTIMESAT              261
+    82                              <1>   %define SYS_GET_KERNEL_SYMS        177
+    83                              <1>   %define SYS_GET_MEMPOLICY          239
+    84                              <1>   %define SYS_GET_ROBUST_LIST        274
+    85                              <1>   %define SYS_GET_THREAD_AREA        211
+    86                              <1>   %define SYS_GETCWD                 79 
+    87                              <1>   %define SYS_GETDENTS               78 
+    88                              <1>   %define SYS_GETDENTS64             217
+    89                              <1>   %define SYS_GETEGID                108
+    90                              <1>   %define SYS_GETEUID                107
+    91                              <1>   %define SYS_GETGID                 104
+    92                              <1>   %define SYS_GETGROUPS              115
+    93                              <1>   %define SYS_GETITIMER              36 
+    94                              <1>   %define SYS_GETPEERNAME            52 
+    95                              <1>   %define SYS_GETPGID                121
+    96                              <1>   %define SYS_GETPGRP                111
+    97                              <1>   %define SYS_GETPID                 39 
+    98                              <1>   %define SYS_GETPMSG                181
+    99                              <1>   %define SYS_GETPPID                110
+   100                              <1>   %define SYS_GETPRIORITY            140
+   101                              <1>   %define SYS_GETRESGID              120
+   102                              <1>   %define SYS_GETRESUID              118
+   103                              <1>   %define SYS_GETRLIMIT              97 
+   104                              <1>   %define SYS_GETRUSAGE              98 
+   105                              <1>   %define SYS_GETSID                 124
+   106                              <1>   %define SYS_GETSOCKNAME            51 
+   107                              <1>   %define SYS_GETSOCKOPT             55 
+   108                              <1>   %define SYS_GETTID                 186
+   109                              <1>   %define SYS_GETTIMEOFDAY           96 
+   110                              <1>   %define SYS_GETUID                 102
+   111                              <1>   %define SYS_GETXATTR               191
+   112                              <1>   %define SYS_INIT_MODULE            175
+   113                              <1>   %define SYS_INOTIFY_ADD_WATCH      254
+   114                              <1>   %define SYS_INOTIFY_INIT           253
+   115                              <1>   %define SYS_INOTIFY_INIT1          294
+   116                              <1>   %define SYS_INOTIFY_RM_WATCH       255
+   117                              <1>   %define SYS_IO_CANCEL              210
+   118                              <1>   %define SYS_IO_DESTROY             207
+   119                              <1>   %define SYS_IO_GETEVENTS           208
+   120                              <1>   %define SYS_IO_SETUP               206
+   121                              <1>   %define SYS_IO_SUBMIT              209
+   122                              <1>   %define SYS_IOCTL                  16 
+   123                              <1>   %define SYS_IOPERM                 173
+   124                              <1>   %define SYS_IOPL                   172
+   125                              <1>   %define SYS_IOPRIO_GET             252
+   126                              <1>   %define SYS_IOPRIO_SET             251
+   127                              <1>   %define SYS_KEXEC_LOAD             246
+   128                              <1>   %define SYS_KEYCTL                 250
+   129                              <1>   %define SYS_KILL                   62
+   130                              <1>   %define SYS_LCHOWN                 94 
+   131                              <1>   %define SYS_LGETXATTR              192
+   132                              <1>   %define SYS_LINK                   86 
+   133                              <1>   %define SYS_LINKAT                 265
+   134                              <1>   %define SYS_LISTEN                 50 
+   135                              <1>   %define SYS_LISTXATTR              194
+   136                              <1>   %define SYS_LLISTXATTR             195
+   137                              <1>   %define SYS_LOOKUP_DCOOKIE         212
+   138                              <1>   %define SYS_LREMOVEXATTR           198
+   139                              <1>   %define SYS_LSEEK                  8  
+   140                              <1>   %define SYS_LSETXATTR              189
+   141                              <1>   %define SYS_LSTAT                  6
+   142                              <1>   %define SYS_MADVISE                28 
+   143                              <1>   %define SYS_MBIND                  237
+   144                              <1>   %define SYS_MIGRATE_PAGES          256
+   145                              <1>   %define SYS_MINCORE                27 
+   146                              <1>   %define SYS_MKDIR                  83 
+   147                              <1>   %define SYS_MKDIRAT                258
+   148                              <1>   %define SYS_MKNOD                  133
+   149                              <1>   %define SYS_MKNODAT                259
+   150                              <1>   %define SYS_MLOCK                  149
+   151                              <1>   %define SYS_MLOCKALL               151
+   152                              <1>   %define SYS_MMAP                   9  
+   153                              <1>   %define SYS_MODIFY_LDT             154
+   154                              <1>   %define SYS_MOUNT                  165
+   155                              <1>   %define SYS_MOVE_PAGES             279
+   156                              <1>   %define SYS_MPROTECT               10 
+   157                              <1>   %define SYS_MQ_GETSETATTR          245
+   158                              <1>   %define SYS_MQ_NOTIFY              244
+   159                              <1>   %define SYS_MQ_OPEN                240
+   160                              <1>   %define SYS_MQ_TIMEDRECEIVE        243
+   161                              <1>   %define SYS_MQ_TIMEDSEND           242
+   162                              <1>   %define SYS_MQ_UNLINK              241
+   163                              <1>   %define SYS_MREMAP                 25 
+   164                              <1>   %define SYS_MSGCTL                 71 
+   165                              <1>   %define SYS_MSGGET                 68
+   166                              <1>   %define SYS_MSGRCV                 70
+   167                              <1>   %define SYS_MSGSND                 69
+   168                              <1>   %define SYS_MSYNC                  26
+   169                              <1>   %define SYS_MUNLOCK                150
+   170                              <1>   %define SYS_MUNLOCKALL             152
+   171                              <1>   %define SYS_MUNMAP                 11 
+   172                              <1>   %define SYS_NANOSLEEP              35
+   173                              <1>   %define SYS_NEWFSTATAT             262
+   174                              <1>   %define SYS_NFSSERVCTL             180
+   175                              <1>   %define SYS_OPEN                   2
+   176                              <1>   %define SYS_OPENAT                 257
+   177                              <1>   %define SYS_PAUSE                  34 
+   178                              <1>   %define SYS_PERF_EVENT_OPEN        298
+   179                              <1>   %define SYS_PERSONALITY            135
+   180                              <1>   %define SYS_PIPE                   22 
+   181                              <1>   %define SYS_PIPE2                  293
+   182                              <1>   %define SYS_PIVOT_ROOT             155
+   183                              <1>   %define SYS_POLL                   7  
+   184                              <1>   %define SYS_PPOLL                  271
+   185                              <1>   %define SYS_PRCTL                  157
+   186                              <1>   %define SYS_PREAD64                17 
+   187                              <1>   %define SYS_PREADV                 295
+   188                              <1>   %define SYS_PRLIMIT64              302
+   189                              <1>   %define SYS_PSELECT6               270
+   190                              <1>   %define SYS_PTRACE                 101
+   191                              <1>   %define SYS_PUTPMSG                182
+   192                              <1>   %define SYS_PWRITE64               18 
+   193                              <1>   %define SYS_PWRITEV                296
+   194                              <1>   %define SYS_QUERY_MODULE           178
+   195                              <1>   %define SYS_QUOTACTL               179
+   196                              <1>   %define SYS_READ                   0  
+   197                              <1>   %define SYS_READAHEAD              187
+   198                              <1>   %define SYS_READLINK               89 
+   199                              <1>   %define SYS_READLINKAT             267
+   200                              <1>   %define SYS_READV                  19 
+   201                              <1>   %define SYS_REBOOT                 169
+   202                              <1>   %define SYS_RECVFROM               45 
+   203                              <1>   %define SYS_RECVMMSG               299
+   204                              <1>   %define SYS_RECVMSG                47 
+   205                              <1>   %define SYS_REMAP_FILE_PAGES       216
+   206                              <1>   %define SYS_REMOVEXATTR            197
+   207                              <1>   %define SYS_RENAME                 82 
+   208                              <1>   %define SYS_RENAMEAT               264
+   209                              <1>   %define SYS_REQUEST_KEY            249
+   210                              <1>   %define SYS_RESTART_SYSCALL        219
+   211                              <1>   %define SYS_RMDIR                  84 
+   212                              <1>   %define SYS_RT_SIGACTION           13
+   213                              <1>   %define SYS_RT_SIGPENDING          127
+   214                              <1>   %define SYS_RT_SIGPROCMASK         14 
+   215                              <1>   %define SYS_RT_SIGQUEUEINFO        129
+   216                              <1>   %define SYS_RT_SIGRETURN           15 
+   217                              <1>   %define SYS_RT_SIGSUSPEND          130
+   218                              <1>   %define SYS_RT_SIGTIMEDWAIT        128
+   219                              <1>   %define SYS_RT_TGSIGQUEUEINFO      297
+   220                              <1>   %define SYS_SCHED_GET_PRIORITY_MAX 146
+   221                              <1>   %define SYS_SCHED_GET_PRIORITY_MIN 147
+   222                              <1>   %define SYS_SCHED_GETAFFINITY      204
+   223                              <1>   %define SYS_SCHED_GETPARAM         143
+   224                              <1>   %define SYS_SCHED_GETSCHEDULER     145
+   225                              <1>   %define SYS_SCHED_RR_GET_INTERVAL  148
+   226                              <1>   %define SYS_SCHED_SETAFFINITY      203
+   227                              <1>   %define SYS_SCHED_SETPARAM         142
+   228                              <1>   %define SYS_SCHED_SETSCHEDULER     144
+   229                              <1>   %define SYS_SCHED_YIELD            24 
+   230                              <1>   %define SYS_SECURITY               185
+   231                              <1>   %define SYS_SELECT                 23 
+   232                              <1>   %define SYS_SEMCTL                 66 
+   233                              <1>   %define SYS_SEMGET                 64 
+   234                              <1>   %define SYS_SEMOP                  65 
+   235                              <1>   %define SYS_SEMTIMEDOP             220
+   236                              <1>   %define SYS_SENDFILE               40 
+   237                              <1>   %define SYS_SENDMSG                46 
+   238                              <1>   %define SYS_SENDTO                 44 
+   239                              <1>   %define SYS_SET_MEMPOLICY          238
+   240                              <1>   %define SYS_SET_ROBUST_LIST        273
+   241                              <1>   %define SYS_SET_THREAD_AREA        205
+   242                              <1>   %define SYS_SET_TID_ADDRESS        218
+   243                              <1>   %define SYS_SETDOMAINNAME          171
+   244                              <1>   %define SYS_SETFSGID               123
+   245                              <1>   %define SYS_SETFSUID               122
+   246                              <1>   %define SYS_SETGID                 106
+   247                              <1>   %define SYS_SETGROUPS              116
+   248                              <1>   %define SYS_SETHOSTNAME            170
+   249                              <1>   %define SYS_SETITIMER              38 
+   250                              <1>   %define SYS_SETPGID                109
+   251                              <1>   %define SYS_SETPRIORITY            141
+   252                              <1>   %define SYS_SETREGID               114
+   253                              <1>   %define SYS_SETRESGID              119
+   254                              <1>   %define SYS_SETRESUID              117
+   255                              <1>   %define SYS_SETREUID               113
+   256                              <1>   %define SYS_SETRLIMIT              160
+   257                              <1>   %define SYS_SETSID                 112
+   258                              <1>   %define SYS_SETSOCKOPT             54 
+   259                              <1>   %define SYS_SETTIMEOFDAY           164
+   260                              <1>   %define SYS_SETUID                 105
+   261                              <1>   %define SYS_SETXATTR               188
+   262                              <1>   %define SYS_SHMAT                  30 
+   263                              <1>   %define SYS_SHMCTL                 31 
+   264                              <1>   %define SYS_SHMDT                  67 
+   265                              <1>   %define SYS_SHMGET                 29 
+   266                              <1>   %define SYS_SHUTDOWN               48 
+   267                              <1>   %define SYS_SIGALTSTACK            131
+   268                              <1>   %define SYS_SIGNALFD               282
+   269                              <1>   %define SYS_SIGNALFD4              289
+   270                              <1>   %define SYS_SOCKET                 41 
+   271                              <1>   %define SYS_SOCKETPAIR             53 
+   272                              <1>   %define SYS_SPLICE                 275
+   273                              <1>   %define SYS_STAT                   4  
+   274                              <1>   %define SYS_STATFS                 137
+   275                              <1>   %define SYS_SWAPOFF                168
+   276                              <1>   %define SYS_SWAPON                 167
+   277                              <1>   %define SYS_SYMLINK                88 
+   278                              <1>   %define SYS_SYMLINKAT              266
+   279                              <1>   %define SYS_SYNC                   162
+   280                              <1>   %define SYS_SYNC_FILE_RANGE        277
+   281                              <1>   %define SYS__SYSCTL                156
+   282                              <1>   %define SYS_SYSFS                  139
+   283                              <1>   %define SYS_SYSINFO                99 
+   284                              <1>   %define SYS_SYSLOG                 103
+   285                              <1>   %define SYS_TEE                    276
+   286                              <1>   %define SYS_TGKILL                 234
+   287                              <1>   %define SYS_TIME                   201
+   288                              <1>   %define SYS_TIMER_CREATE           222
+   289                              <1>   %define SYS_TIMER_DELETE           226
+   290                              <1>   %define SYS_TIMER_GETOVERRUN       225
+   291                              <1>   %define SYS_TIMER_GETTIME          224
+   292                              <1>   %define SYS_TIMER_SETTIME          223
+   293                              <1>   %define SYS_TIMERFD_CREATE         283
+   294                              <1>   %define SYS_TIMERFD_GETTIME        287
+   295                              <1>   %define SYS_TIMERFD_SETTIME        286
+   296                              <1>   %define SYS_TIMES                  100
+   297                              <1>   %define SYS_TKILL                  200
+   298                              <1>   %define SYS_TRUNCATE               76 
+   299                              <1>   %define SYS_TUXCALL                184
+   300                              <1>   %define SYS_UMASK                  95 
+   301                              <1>   %define SYS_UMOUNT2                166
+   302                              <1>   %define SYS_UNAME                  63 
+   303                              <1>   %define SYS_UNLINK                 87 
+   304                              <1>   %define SYS_UNLINKAT               263
+   305                              <1>   %define SYS_UNSHARE                272
+   306                              <1>   %define SYS_USELIB                 134
+   307                              <1>   %define SYS_USTAT                  136
+   308                              <1>   %define SYS_UTIME                  132
+   309                              <1>   %define SYS_UTIMENSAT              280
+   310                              <1>   %define SYS_UTIMES                 235
+   311                              <1>   %define SYS_VFORK                  58 
+   312                              <1>   %define SYS_VHANGUP                153
+   313                              <1>   %define SYS_VMSPLICE               278
+   314                              <1>   %define SYS_VSERVER                236
+   315                              <1>   %define SYS_WAIT4                  61
+   316                              <1>   %define SYS_WAITID                 247
+   317                              <1>   %define SYS_WRITE                  1
+   318                              <1>   %define SYS_WRITEV                 20
+   319                              <1> 
+   320                              <1> %elif
+   321                              <1>      %warning "syscalls.inc already included" 
+   322                              <1> %endif
+   323                                  %include "termio.inc"
+   324                              <1> %ifndef _ASM_TERMIO_INC_
+   325                              <1> %define _ASM_TERMIO_INC_
+   326                              <1> 
+   327                              <1> ; possible input and output devices for the konsole
+   328                              <1> 
+   329                              <1> %define STDIN   0
+   330                              <1> %define STDOUT  1
+   331                              <1> %define STDERR  2
+   332                              <1> 
+   333                              <1> ;IOCTL values
+   334                              <1> %define TCGETS      5401h	; termios instruction to read flags
+   335                              <1> %define TCSETS      5402h	; termios instruction to write flags
+   336                              <1> %define TIOCGWINSZ  5413h	; winsize
+   337                              <1> 
+   338                              <1> %define ICANON       2
+   339                              <1> %define ECHO        10
+   340                              <1> 
+   341                              <1> ; *** STRUCTURES ***
+   342                              <1> 
+   343                              <1> STRUC TERMIOS_STRUC
+   344 00000000 <res 00000004>      <1>     .c_iflag:   resd    1   ; input mode flags
+   345 00000004 <res 00000004>      <1>     .c_oflag:   resd    1   ; output mode flags
+   346 00000008 <res 00000004>      <1>     .c_cflag:   resd    1   ; control mode flags
+   347 0000000C <res 00000004>      <1>     .c_lflag:   resd    1   ; local mode flags
+   348 00000010 <res 00000001>      <1>     .c_line:    resb    1   ; line discipline
+   349 00000011 <res 00000013>      <1>     .c_cc:      resb    19  ; control characters
+   350                              <1> ENDSTRUC
+   351                              <1> 
+   352                              <1> STRUC WINSIZE_STRUC
+   353 00000000 <res 00000008>      <1>     .rows:      resq    1
+   354 00000008 <res 00000008>      <1>     .cols:      resq    1
+   355 00000010 <res 00000008>      <1>     .xpixels:   resq    1       ; not used
+   356 00000018 <res 00000008>      <1>     .ypixels:   resq    1       ; not used
+   357                              <1> ENDSTRUC
+   358                              <1> 
+   359                              <1> ; *** MACROS ***
+   360                              <1> 
+   361                              <1> %macro TERMIOS 1
+   362                              <1>     %1: ISTRUC TERMIOS_STRUC
+   363                              <1>         at TERMIOS_STRUC.c_iflag, dd 0
+   364                              <1>         at TERMIOS_STRUC.c_oflag, dd 0
+   365                              <1>         at TERMIOS_STRUC.c_cflag, dd 0
+   366                              <1>         at TERMIOS_STRUC.c_lflag, dd 0
+   367                              <1>         at TERMIOS_STRUC.c_line,  db 0
+   368                              <1>         at TERMIOS_STRUC.c_cc,    times 19 db 0
+   369                              <1>     IEND
+   370                              <1>     %define %1.c_iflag %1+TERMIOS_STRUC.c_iflag
+   371                              <1>     %define %1.c_oflag %1+TERMIOS_STRUC.c_oflag
+   372                              <1>     %define %1.c_cflag %1+TERMIOS_STRUC.c_cflag
+   373                              <1>     %define %1.c_lflag %1+TERMIOS_STRUC.c_lflag
+   374                              <1>     %define %1.c_line %1+TERMIOS_STRUC.c_line
+   375                              <1>     %define %1.c_cc %1+TERMIOS_STRUC.c_cc
+   376                              <1> %endmacro
+   377                              <1> 
+   378                              <1> %macro WINSIZE 1
+   379                              <1>     %1: ISTRUC WINSIZE_STRUC
+   380                              <1>             at WINSIZE_STRUC.rows,    dq 0
+   381                              <1>             at WINSIZE_STRUC.cols,    dq 0
+   382                              <1>             at WINSIZE_STRUC.xpixels, dq 0
+   383                              <1>             at WINSIZE_STRUC.ypixels, dq 0
+   384                              <1>         IEND
+   385                              <1>     %define %1.rows     %1+WINSIZE_STRUC.rows
+   386                              <1>     %define %1.cols     %1+WINSIZE_STRUC.cols
+   387                              <1>     %define %1.xpixels  %1+WINSIZE_STRUC.xpixels
+   388                              <1>     %define %1.ypixels  %1+WINSIZE_STRUC.ypixels 
+   389                              <1> %endmacro
+   390                              <1> 
+   391                              <1> %elif
+   392                              <1>     %warning "termio.inc already included"
+   393                              <1> %endif
+   394                                  %include "fileio.inc"
+   395                              <1> %ifndef _ASM_FILEIO_INC_
+   396                              <1> %define _ASM_FILEIO_INC_
+   397                              <1> 
+   398                              <1>   %define	O_RDONLY	0
+   399                              <1>   %define	O_WRONLY	1
+   400                              <1>   %define	O_RDWR		2
+   401                              <1>   %define       O_DIRECTORY     65536
+   402                              <1>   
+   403                              <1>   ;The following flags are defined for the st_mode field:
+   404                              <1> 
+   405                              <1>   %define S_IFMT     61440 ; bit mask for the file type bit fields
+   406                              <1>   %define S_IFSOCK   49152 ; socket
+   407                              <1>   %define S_IFLNK    40960 ; symbolic link
+   408                              <1>   %define S_IFREG    32768 ; regular file
+   409                              <1>   %define S_IFBLK    24576 ; block device
+   410                              <1>   %define S_IFDIR    16384 ; directory
+   411                              <1>   %define S_IFCHR    8192  ; character device
+   412                              <1>   %define S_IFIFO    4096  ; FIFO
+   413                              <1>   %define S_ISUID    2048  ; set UID bit
+   414                              <1>   %define S_ISGID    1024  ; set-group-ID bit (see below)
+   415                              <1>   %define S_ISVTX    512   ; sticky bit (see below)
+   416                              <1> 
+   417                              <1>   %define S_IRWXU    448   ; mask for file owner permissions
+   418                              <1>   %define S_IRUSR    256   ; owner has read permission
+   419                              <1>   %define S_IWUSR    128   ; owner has write permission
+   420                              <1>   %define S_IXUSR    64    ; owner has execute permission
+   421                              <1> 
+   422                              <1>   %define S_IRWXG    56    ; mask for group permissions
+   423                              <1>   %define S_IRGRP    32    ; group has read permission
+   424                              <1>   %define S_IWGRP    16    ; group has write permission
+   425                              <1>   %define S_IXGRP    8     ; group has execute permission
+   426                              <1> 
+   427                              <1>   %define S_IRWXO    7     ; mask for permissions for others (not in group)
+   428                              <1>   %define S_IROTH    4     ; others have read permission
+   429                              <1>   %define S_IWOTH    2     ; others have write permission
+   430                              <1>   %define S_IXOTH    1     ; others have execute permission
+   431                              <1> 
+   432                              <1>   ; STAT structure definition
+   433                              <1> 
+   434                              <1>   STRUC STAT_STRUC
+   435 00000000 <res 00000008>      <1>   .st_dev:		resq 1	; device
+   436 00000008 <res 00000008>      <1>   .st_ino:		resq 1	; file serial number
+   437 00000010 <res 00000008>      <1>   .st_nlink:		resq 1	; link count 
+   438 00000018 <res 00000004>      <1>   .st_mod:		resd 1	; file mode
+   439 0000001C <res 00000004>      <1>   .st_uid:		resd 1	; user id of owner
+   440 00000020 <res 00000004>      <1>   .st_gid:		resd 1	; group id of owner
+   441 00000024 <res 00000008>      <1>   .st_rdev:		resq 1	; device number if device
+   442 0000002C <res 00000004>      <1>   ._pad1:		resd 1
+   443 00000030 <res 00000008>      <1>   .st_size:		resq 1	; filesize in bytes
+   444 00000038 <res 00000004>      <1>   .st_blksize:		resd 1	; optimal block size for I/O
+   445 0000003C <res 00000004>      <1>   ._pad2:		resd 1
+   446 00000040 <res 00000008>      <1>   .st_blocks:		resq 1	; number of 512-byte blocks allocated
+   447 00000048 <res 00000008>      <1>   .st_atime:		resq 1	; last access time secs
+   448 00000050 <res 00000008>      <1>   .st_atime_nsec:	resq 1	; last access time nsecs
+   449 00000058 <res 00000008>      <1>   .st_mtime:		resq 1	; last modification time secs
+   450 00000060 <res 00000008>      <1>   .st_mtime_nsec:	resq 1	; last modification time nsecs
+   451 00000068 <res 00000008>      <1>   .st_ctime:		resq 1	; last status changed time secs
+   452 00000070 <res 00000008>      <1>   .st_ctime_nsec:	resq 1	; last status changed time nsecs
+   453 00000078 <res 00000008>      <1>   ._unused1:		resq 1
+   454 00000080 <res 00000008>      <1>   ._unused2:		resq 1
+   455 00000088 <res 00000008>      <1>   ._unused3:		resq 1
+   456                              <1>   ENDSTRUC
+   457                              <1> 
+   458                              <1>   %macro STAT 1
+   459                              <1>     %1: ISTRUC STAT_STRUC
+   460                              <1>       at STAT_STRUC.st_dev,		dq 0	; device
+   461                              <1>       at STAT_STRUC.st_ino,		dq 0	; file serial number
+   462                              <1>       at STAT_STRUC.st_nlink,		dq 0	; link count 
+   463                              <1>       at STAT_STRUC.st_mod,		dd 0	; file mode
+   464                              <1>       at STAT_STRUC.st_uid,		dd 0	; user id of owner
+   465                              <1>       at STAT_STRUC.st_gid,		dd 0	; group id of owner
+   466                              <1>       at STAT_STRUC.st_rdev,		dq 0	; device number if device
+   467                              <1>       at STAT_STRUC._pad1,		dd 0
+   468                              <1>       at STAT_STRUC.st_size,		dq 0	; filesize in bytes
+   469                              <1>       at STAT_STRUC.st_blksize,	        dd 0	; optimal block size for I/O
+   470                              <1>       at STAT_STRUC._pad2,		dd 0
+   471                              <1>       at STAT_STRUC.st_blocks,	        dq 0	; number of 512-byte blocks allocated
+   472                              <1>       at STAT_STRUC.st_atime,		dq 0	; last access time secs
+   473                              <1>       at STAT_STRUC.st_atime_nsec,	dq 0	; last access time nsecs
+   474                              <1>       at STAT_STRUC.st_mtime,		dq 0	; last modification time secs
+   475                              <1>       at STAT_STRUC.st_mtime_nsec,	dq 0	; last modification time nsecs
+   476                              <1>       at STAT_STRUC.st_ctime,		dq 0	; last status changed time secs
+   477                              <1>       at STAT_STRUC.st_ctime_nsec,	dq 0	; last status changed time nsecs
+   478                              <1>       at STAT_STRUC._unused1,		dq 0
+   479                              <1>       at STAT_STRUC._unused2,		dq 0
+   480                              <1>       at STAT_STRUC._unused3,		dq 0
+   481                              <1>     IEND  
+   482                              <1> 
+   483                              <1>     ; definition macro's for STAT structure
+   484                              <1> 
+   485                              <1>     %define %1.st_dev        %1+STAT_STRUC.st_dev
+   486                              <1>     %define %1.st_ino        %1+STAT_STRUC.st_ino
+   487                              <1>     %define %1.st_nlink      %1+STAT_STRUC.st_nlink
+   488                              <1>     %define %1.st_mod        %1+STAT_STRUC.st_mod
+   489                              <1>     %define %1.st_uid        %1+STAT_STRUC.st_uid
+   490                              <1>     %define %1.st_gid        %1+STAT_STRUC.st_gid
+   491                              <1>     %define %1.st_rdev       %1+STAT_STRUC.st_rdev
+   492                              <1>     %define %1._pad1         %1+STAT_STRUC._pad1
+   493                              <1>     %define %1.st_size       %1+STAT_STRUC.st_size
+   494                              <1>     %define %1.st_blksize    %1+STAT_STRUC.st_blksize
+   495                              <1>     %define %1._pad2         %1+STAT_STRUC._pad2
+   496                              <1>     %define %1.st_blocks     %1+STAT_STRUC.st_blocks
+   497                              <1>     %define %1.st_atime      %1+STAT_STRUC.st_atime
+   498                              <1>     %define %1.st_atime_nsec %1+STAT_STRUC.st_atime_nsec
+   499                              <1>     %define %1.st_mtime      %1+STAT_STRUC.st_mtime
+   500                              <1>     %define %1.st_mtime_nsec %1+STAT_STRUC.st_mtime_nsec
+   501                              <1>     %define %1.st_ctime      %1+STAT_STRUC.st_ctime
+   502                              <1>     %define %1.st_ctime_nsec %1+STAT_STRUC.st_ctime_nsec
+   503                              <1>     %define %1._unused1      %1+STAT_STRUC._unused1
+   504                              <1>     %define %1._unused2      %1+STAT_STRUC._unused2
+   505                              <1>     %define %1._unused3      %1+STAT_STRUC._unused3
+   506                              <1>   %endmacro
+   507                              <1> 
+   508                              <1>   ; directory and file structures
+   509                              <1>   
+   510                              <1>   STRUC DIRENT64_STRUC
+   511 00000000 <res 00000008>      <1>     .d_ino:          resq 1    ; inode
+   512 00000008 <res 00000008>      <1>     .d_off:          resq 1    ; offset to next linux dirent
+   513 00000010 <res 00000002>      <1>     .d_reclen:       resw 1    ; length of this linux dirent
+   514 00000012 <res 00000001>      <1>     .d_type:         resb 1    ; file type (since linux 2.6.42
+   515 00000013 <res 00000100>      <1>     .d_name:         resb 256  ; filename
+   516                              <1>   ENDSTRUC
+   517                              <1>  
+   518                              <1>   %macro DIRENT64 1
+   519                              <1>     %1: ISTRUC DIRENT64_STRUC
+   520                              <1>       at DIRENT64_STRUC.d_ino,          dq 0              ; inode
+   521                              <1>       at DIRENT64_STRUC.d_off,          dq 0              ; offset to next linux dirent
+   522                              <1>       at DIRENT64_STRUC.d_reclen,       dw 0              ; length of this linux dirent
+   523                              <1>       at DIRENT64_STRUC.d_type,         db 0              ; file type (since linux 2.6.42)
+   524                              <1>       at DIRENT64_STRUC.d_name,         times 256 db 0    ; filename
+   525                              <1>     IEND
+   526                              <1>     %define %1.d_ino       %1+DIRENT64_STRUC.d_ino
+   527                              <1>     %define %1.d_off       %1+DIRENT64_STRUC.d_off
+   528                              <1>     %define %1.d_reclen    %1+DIRENT64_STRUC.d_reclen
+   529                              <1>     %define %1.d_type      %1+DIRENT64_STRUC.d_type
+   530                              <1>     %define %1.d_name      %1+DIRENT64_STRUC.d_name
+   531                              <1>   %endmacro
+   532                              <1>   
+   533                              <1>   %define DT_UNKNOWN     0      ; file type unknown
+   534                              <1>   %define DT_FIFO        1      ; named pipe
+   535                              <1>   %define DT_CHR         2      ; character device
+   536                              <1>   %define DT_DIR         4      ; directory
+   537                              <1>   %define DT_BLK         6      ; block device
+   538                              <1>   %define DT_REG         8      ; regular file
+   539                              <1>   %define DT_LNK         10     ; symbolic link
+   540                              <1>   %define DT_SOCK        12     ; UNIX domain socket
+   541                              <1>   %define DT_WHT         14     ; entry without file type ; undocumented
+   542                              <1> 
+   543                              <1> %elif
+   544                              <1>     %warning "fileio.inc already included"
+   545                              <1> %endif
+   546                                  
+   547                                  BITS 64
+   548                                  
+   549                                  section .bss
+   550 00000000 <res 00000008>                memalloc:	resq	1	; pointer to memory break
+   551 00000008 <res 00000008>                fd:	resq	1	; filedescriptor
+   552                                        
+   553                                  section .data
+   554                                  
+   555 00000000 436F6E74656E742D74-           httpheader:	db	'Content-type: application/octet-stream', 10
+   556 00000009 7970653A206170706C-
+   557 00000012 69636174696F6E2F6F-
+   558 0000001B 637465742D73747265-
+   559 00000024 616D0A             
+   560 00000027 436F6E74656E742D44-     			db	'Content-Disposition: attachment; filename="logo.png"', 10, 10
+   561 00000030 6973706F736974696F-
+   562 00000039 6E3A20617474616368-
+   563 00000042 6D656E743B2066696C-
+   564 0000004B 656E616D653D226C6F-
+   565 00000054 676F2E706E67220A0A 
+   566                                        .length:		equ	$-httpheader
+   567 0000005D 436F6E74656E742D74-           response:		db	'Content-type: text/html', 10, 10
+   568 00000066 7970653A2074657874-
+   569 0000006F 2F68746D6C0A0A     
+   570 00000076 3C7370616E3E536F6D-     			db	'<span>Something went wrong, or file not found or the server ran out of memory</span>', 10
+   571 0000007F 657468696E67207765-
+   572 00000088 6E742077726F6E672C-
+   573 00000091 206F722066696C6520-
+   574 0000009A 6E6F7420666F756E64-
+   575 000000A3 206F72207468652073-
+   576 000000AC 65727665722072616E-
+   577 000000B5 206F7574206F66206D-
+   578 000000BE 656D6F72793C2F7370-
+   579 000000C7 616E3E0A           
+   580                                        .length:		equ 	$-response
+   581 000000CB 2E2E2F646F776E6C6F-           filename:		db	'../downloads/logo.png',0
+   582 000000D4 6164732F6C6F676F2E-
+   583 000000DD 706E6700           
+   584                                    
+   585                                        STAT stat		; STAT structure instance for FSTAT syscall
+   586                              <1>  %1: ISTRUC STAT_STRUC
+   587 000000E1 0000000000000000    <1>  at STAT_STRUC.st_dev, dq 0
+   588 000000E9 0000000000000000    <1>  at STAT_STRUC.st_ino, dq 0
+   589 000000F1 0000000000000000    <1>  at STAT_STRUC.st_nlink, dq 0
+   590 000000F9 00000000            <1>  at STAT_STRUC.st_mod, dd 0
+   591 000000FD 00000000            <1>  at STAT_STRUC.st_uid, dd 0
+   592 00000101 00000000            <1>  at STAT_STRUC.st_gid, dd 0
+   593 00000105 0000000000000000    <1>  at STAT_STRUC.st_rdev, dq 0
+   594 0000010D 00000000            <1>  at STAT_STRUC._pad1, dd 0
+   595 00000111 0000000000000000    <1>  at STAT_STRUC.st_size, dq 0
+   596 00000119 00000000            <1>  at STAT_STRUC.st_blksize, dd 0
+   597 0000011D 00000000            <1>  at STAT_STRUC._pad2, dd 0
+   598 00000121 0000000000000000    <1>  at STAT_STRUC.st_blocks, dq 0
+   599 00000129 0000000000000000    <1>  at STAT_STRUC.st_atime, dq 0
+   600 00000131 0000000000000000    <1>  at STAT_STRUC.st_atime_nsec, dq 0
+   601 00000139 0000000000000000    <1>  at STAT_STRUC.st_mtime, dq 0
+   602 00000141 0000000000000000    <1>  at STAT_STRUC.st_mtime_nsec, dq 0
+   603 00000149 0000000000000000    <1>  at STAT_STRUC.st_ctime, dq 0
+   604 00000151 0000000000000000    <1>  at STAT_STRUC.st_ctime_nsec, dq 0
+   605 00000159 0000000000000000    <1>  at STAT_STRUC._unused1, dq 0
+   606 00000161 0000000000000000    <1>  at STAT_STRUC._unused2, dq 0
+   607 00000169 0000000000000000    <1>  at STAT_STRUC._unused3, dq 0
+   608                              <1>  IEND
+   609                              <1> 
+   610                              <1> 
+   611                              <1> 
+   612                              <1>  %define %1.st_dev %1+STAT_STRUC.st_dev
+   613                              <1>  %define %1.st_ino %1+STAT_STRUC.st_ino
+   614                              <1>  %define %1.st_nlink %1+STAT_STRUC.st_nlink
+   615                              <1>  %define %1.st_mod %1+STAT_STRUC.st_mod
+   616                              <1>  %define %1.st_uid %1+STAT_STRUC.st_uid
+   617                              <1>  %define %1.st_gid %1+STAT_STRUC.st_gid
+   618                              <1>  %define %1.st_rdev %1+STAT_STRUC.st_rdev
+   619                              <1>  %define %1._pad1 %1+STAT_STRUC._pad1
+   620                              <1>  %define %1.st_size %1+STAT_STRUC.st_size
+   621                              <1>  %define %1.st_blksize %1+STAT_STRUC.st_blksize
+   622                              <1>  %define %1._pad2 %1+STAT_STRUC._pad2
+   623                              <1>  %define %1.st_blocks %1+STAT_STRUC.st_blocks
+   624                              <1>  %define %1.st_atime %1+STAT_STRUC.st_atime
+   625                              <1>  %define %1.st_atime_nsec %1+STAT_STRUC.st_atime_nsec
+   626                              <1>  %define %1.st_mtime %1+STAT_STRUC.st_mtime
+   627                              <1>  %define %1.st_mtime_nsec %1+STAT_STRUC.st_mtime_nsec
+   628                              <1>  %define %1.st_ctime %1+STAT_STRUC.st_ctime
+   629                              <1>  %define %1.st_ctime_nsec %1+STAT_STRUC.st_ctime_nsec
+   630                              <1>  %define %1._unused1 %1+STAT_STRUC._unused1
+   631                              <1>  %define %1._unused2 %1+STAT_STRUC._unused2
+   632                              <1>  %define %1._unused3 %1+STAT_STRUC._unused3
+   633                                         
+   634                                  section .text
+   635                                          global _start
+   636                                  _start:
+   637                                       
+   638                                  	; open the file and get filedescriptor
+   639 00000000 48BF-                   	mov	rdi, filename
+   640 00000002 [CB00000000000000] 
+   641 0000000A BE00000000              	mov	rsi, O_RDONLY
+   642 0000000F B802000000              	mov	rax, SYS_OPEN
+   643 00000014 0F05                    	syscall
+   644 00000016 4883F800                	cmp	rax, 0
+   645 0000001A 0F8CD4000000            	jl	error				; Error, file doesn't exists
+   646 00000020 48890425[08000000]      	mov	QWORD[fd], rax			; save filedescriptor
+   647                                        
+   648                                  	; read the filesize
+   649 00000028 488B3C25[08000000]      	mov	rdi, QWORD[fd]
+   650 00000030 48BE-                   	mov	rsi, stat
+   651 00000032 [E100000000000000] 
+   652 0000003A B805000000              	mov	rax, SYS_FSTAT
+   653 0000003F 0F05                    	syscall
+   654                                        
+   655                                  	; get memory break
+   656 00000041 BF00000000              	mov	rdi, 0
+   657 00000046 B80C000000              	mov	rax, SYS_BRK
+   658 0000004B 0F05                    	syscall
+   659                                        
+   660 0000004D 4883F800                	cmp	rax, 0
+   661 00000051 0F8E9D000000            	jle	error				; no memory available to allocate
+   662                                        
+   663 00000057 48890425[00000000]      	mov	QWORD[memalloc], rax		; save pointer to memory break
+   664 0000005F 48030425[11010000]      	add	rax, QWORD[stat.st_size]	; add filesize to allocate memory
+   665                                        
+   666                                  	; try to allocate additional memory
+   667 00000067 4889C7                  	mov	rdi, rax
+   668 0000006A B80C000000              	mov	rax, SYS_BRK
+   669 0000006F 0F05                    	syscall
+   670 00000071 4839F8                  	cmp	rax, rdi			; new memory break equal to calculated one?
+   671 00000074 757E                    	jne	error				; not enough memory available
+   672                                             
+   673                                        ; read the file in the allocated memory
+   674 00000076 488B3C25[08000000]      	mov	rdi, QWORD[fd]
+   675 0000007E 488B3425[00000000]      	mov	rsi, QWORD[memalloc]
+   676 00000086 488B1425[11010000]      	mov	rdx, QWORD[stat.st_size]	; bytes to read
+   677 0000008E B800000000              	mov	rax, SYS_READ
+   678 00000093 0F05                    	syscall
+   679                                  
+   680                                  	; close the file
+   681 00000095 488B3C25[08000000]      	mov	rdi, QWORD[fd]
+   682 0000009D B803000000              	mov	rax, SYS_CLOSE
+   683 000000A2 0F05                    	syscall
+   684                                  
+   685                                  	; write the HTTP header
+   686 000000A4 BF01000000              	mov	rdi, STDOUT
+   687 000000A9 48BE-                   	mov	rsi, httpheader
+   688 000000AB [0000000000000000] 
+   689 000000B3 BA5D000000              	mov	rdx, httpheader.length
+   690 000000B8 B801000000              	mov	rax, SYS_WRITE
+   691 000000BD 0F05                    	syscall
+   692                                  	; write the filecontents
+   693 000000BF BF01000000              	mov	rdi, STDOUT
+   694 000000C4 488B3425[00000000]      	mov	rsi, QWORD[memalloc]
+   695 000000CC 488B1425[11010000]      	mov	rdx, QWORD[stat.st_size]
+   696 000000D4 B801000000              	mov	rax, SYS_WRITE
+   697 000000D9 0F05                    	syscall
+   698                                        
+   699                                  	; release allocated memory
+   700 000000DB 488B3C25[00000000]      	mov	rdi, QWORD[memalloc]
+   701 000000E3 B80C000000              	mov	rax, SYS_BRK
+   702 000000E8 0F05                    	syscall
+   703                                  exit:      
+   704                                  	; exit the program
+   705 000000EA 4831FF                  	xor	rdi, rdi
+   706 000000ED B83C000000              	mov	rax, SYS_EXIT
+   707 000000F2 0F05                    	syscall
+   708                                        
+   709                                  error:
+   710 000000F4 BF01000000              	mov	rdi, STDOUT
+   711 000000F9 48BE-                   	mov	rsi, response
+   712 000000FB [5D00000000000000] 
+   713 00000103 BA6E000000              	mov	rdx, response.length
+   714 00000108 B801000000              	mov	rax, SYS_WRITE
+   715 0000010D 0F05                    	syscall
+   716 0000010F EBD9                    	jmp	exit

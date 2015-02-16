@@ -1,0 +1,445 @@
+     1                                  ;***********************************************************************************************
+     2                                  ; Name:         setcookie.asm
+     3                                  ; Build:        see makefile
+     4                                  ; Description:  set 4 cookies
+     5                                  ;               This isn't a state-of-the-art program but to be complete on cgi applications it's
+     6                                  ;               a nice example on how to set cookies.
+     7                                  ;               The executable of this file need to be uploaded to your webservers cgi directory
+     8                                  ;               from there you can access the application from a webbrowser.
+     9                                  ;***********************************************************************************************
+    10                                  bits 64
+    11                                  
+    12                                  %include "syscalls.inc"
+    13                              <1> %ifndef _ASM_SYSCALLS_INC_
+    14                              <1> %define _ASM_SYSCALLS_INC_
+    15                              <1> 
+    16                              <1>   %define SYS_ACCEPT                 43
+    17                              <1>   %define SYS_ACCEPT4                288
+    18                              <1>   %define SYS_ACCESS                 21
+    19                              <1>   %define SYS_ACCT                   163
+    20                              <1>   %define SYS_ADD_KEY                248
+    21                              <1>   %define SYS_ADJTIMEX               159
+    22                              <1>   %define SYS_AFS_SYSCALL            183
+    23                              <1>   %define SYS_ALARM                  37
+    24                              <1>   %define SYS_ARCH_PRCTL             158
+    25                              <1>   %define SYS_BIND                   49
+    26                              <1>   %define SYS_BRK                    12
+    27                              <1>   %define SYS_CAPGET                 125
+    28                              <1>   %define SYS_CAPSET                 126
+    29                              <1>   %define SYS_CHDIR                  80 
+    30                              <1>   %define SYS_CHMOD                  90 
+    31                              <1>   %define SYS_CHOWN                  92 
+    32                              <1>   %define SYS_CHROOT                 161
+    33                              <1>   %define SYS_CLOCK_GETRES           229
+    34                              <1>   %define SYS_CLOCK_GETTIME          228
+    35                              <1>   %define SYS_CLOCK_NANOSLEEP        230
+    36                              <1>   %define SYS_CLOCK_SETTIME          227
+    37                              <1>   %define SYS_CLONE                  56
+    38                              <1>   %define SYS_CLOSE                  3
+    39                              <1>   %define SYS_CONNECT                42
+    40                              <1>   %define SYS_CREAT                  85
+    41                              <1>   %define SYS_CREATE_MODULE          174
+    42                              <1>   %define SYS_DELETE_MODULE          176
+    43                              <1>   %define SYS_DUP                    32
+    44                              <1>   %define SYS_DUP2                   33
+    45                              <1>   %define SYS_DUP3                   292
+    46                              <1>   %define SYS_EPOLL_CREATE           213
+    47                              <1>   %define SYS_EPOLL_CREATE1          291
+    48                              <1>   %define SYS_EPOLL_CTL              233
+    49                              <1>   %define SYS_EPOLL_CTL_OLD          214
+    50                              <1>   %define SYS_EPOLL_PWAIT            281
+    51                              <1>   %define SYS_EPOLL_WAIT             232
+    52                              <1>   %define SYS_EPOLL_WAIT_OLD         215
+    53                              <1>   %define SYS_EVENTFD                284
+    54                              <1>   %define SYS_EVENTFD2               290
+    55                              <1>   %define SYS_EXECVE                 59
+    56                              <1>   %define SYS_EXIT                   60
+    57                              <1>   %define SYS_EXIT_GROUP             231
+    58                              <1>   %define SYS_FACCESSAT              269
+    59                              <1>   %define SYS_FADVISE64              221
+    60                              <1>   %define SYS_FALLOCATE              285
+    61                              <1>   %define SYS_FANOTIFY_INIT          300
+    62                              <1>   %define SYS_FANOTIFY_MARK          301
+    63                              <1>   %define SYS_FCHDIR                 81
+    64                              <1>   %define SYS_FCHMOD                 91
+    65                              <1>   %define SYS_FCHMODAT               268
+    66                              <1>   %define SYS_FCHOWN                 93 
+    67                              <1>   %define SYS_FCHOWNAT               260
+    68                              <1>   %define SYS_FCNTL                  72 
+    69                              <1>   %define SYS_FDATASYNC              75 
+    70                              <1>   %define SYS_FGETXATTR              193
+    71                              <1>   %define SYS_FLISTXATTR             196
+    72                              <1>   %define SYS_FLOCK                  73 
+    73                              <1>   %define SYS_FORK                   57 
+    74                              <1>   %define SYS_FREMOVEXATTR           199
+    75                              <1>   %define SYS_FSETXATTR              190
+    76                              <1>   %define SYS_FSTAT                  5  
+    77                              <1>   %define SYS_FSTATFS                138
+    78                              <1>   %define SYS_FSYNC                  74 
+    79                              <1>   %define SYS_FTRUNCATE              77 
+    80                              <1>   %define SYS_FUTEX                  202
+    81                              <1>   %define SYS_FUTIMESAT              261
+    82                              <1>   %define SYS_GET_KERNEL_SYMS        177
+    83                              <1>   %define SYS_GET_MEMPOLICY          239
+    84                              <1>   %define SYS_GET_ROBUST_LIST        274
+    85                              <1>   %define SYS_GET_THREAD_AREA        211
+    86                              <1>   %define SYS_GETCWD                 79 
+    87                              <1>   %define SYS_GETDENTS               78 
+    88                              <1>   %define SYS_GETDENTS64             217
+    89                              <1>   %define SYS_GETEGID                108
+    90                              <1>   %define SYS_GETEUID                107
+    91                              <1>   %define SYS_GETGID                 104
+    92                              <1>   %define SYS_GETGROUPS              115
+    93                              <1>   %define SYS_GETITIMER              36 
+    94                              <1>   %define SYS_GETPEERNAME            52 
+    95                              <1>   %define SYS_GETPGID                121
+    96                              <1>   %define SYS_GETPGRP                111
+    97                              <1>   %define SYS_GETPID                 39 
+    98                              <1>   %define SYS_GETPMSG                181
+    99                              <1>   %define SYS_GETPPID                110
+   100                              <1>   %define SYS_GETPRIORITY            140
+   101                              <1>   %define SYS_GETRESGID              120
+   102                              <1>   %define SYS_GETRESUID              118
+   103                              <1>   %define SYS_GETRLIMIT              97 
+   104                              <1>   %define SYS_GETRUSAGE              98 
+   105                              <1>   %define SYS_GETSID                 124
+   106                              <1>   %define SYS_GETSOCKNAME            51 
+   107                              <1>   %define SYS_GETSOCKOPT             55 
+   108                              <1>   %define SYS_GETTID                 186
+   109                              <1>   %define SYS_GETTIMEOFDAY           96 
+   110                              <1>   %define SYS_GETUID                 102
+   111                              <1>   %define SYS_GETXATTR               191
+   112                              <1>   %define SYS_INIT_MODULE            175
+   113                              <1>   %define SYS_INOTIFY_ADD_WATCH      254
+   114                              <1>   %define SYS_INOTIFY_INIT           253
+   115                              <1>   %define SYS_INOTIFY_INIT1          294
+   116                              <1>   %define SYS_INOTIFY_RM_WATCH       255
+   117                              <1>   %define SYS_IO_CANCEL              210
+   118                              <1>   %define SYS_IO_DESTROY             207
+   119                              <1>   %define SYS_IO_GETEVENTS           208
+   120                              <1>   %define SYS_IO_SETUP               206
+   121                              <1>   %define SYS_IO_SUBMIT              209
+   122                              <1>   %define SYS_IOCTL                  16 
+   123                              <1>   %define SYS_IOPERM                 173
+   124                              <1>   %define SYS_IOPL                   172
+   125                              <1>   %define SYS_IOPRIO_GET             252
+   126                              <1>   %define SYS_IOPRIO_SET             251
+   127                              <1>   %define SYS_KEXEC_LOAD             246
+   128                              <1>   %define SYS_KEYCTL                 250
+   129                              <1>   %define SYS_KILL                   62
+   130                              <1>   %define SYS_LCHOWN                 94 
+   131                              <1>   %define SYS_LGETXATTR              192
+   132                              <1>   %define SYS_LINK                   86 
+   133                              <1>   %define SYS_LINKAT                 265
+   134                              <1>   %define SYS_LISTEN                 50 
+   135                              <1>   %define SYS_LISTXATTR              194
+   136                              <1>   %define SYS_LLISTXATTR             195
+   137                              <1>   %define SYS_LOOKUP_DCOOKIE         212
+   138                              <1>   %define SYS_LREMOVEXATTR           198
+   139                              <1>   %define SYS_LSEEK                  8  
+   140                              <1>   %define SYS_LSETXATTR              189
+   141                              <1>   %define SYS_LSTAT                  6
+   142                              <1>   %define SYS_MADVISE                28 
+   143                              <1>   %define SYS_MBIND                  237
+   144                              <1>   %define SYS_MIGRATE_PAGES          256
+   145                              <1>   %define SYS_MINCORE                27 
+   146                              <1>   %define SYS_MKDIR                  83 
+   147                              <1>   %define SYS_MKDIRAT                258
+   148                              <1>   %define SYS_MKNOD                  133
+   149                              <1>   %define SYS_MKNODAT                259
+   150                              <1>   %define SYS_MLOCK                  149
+   151                              <1>   %define SYS_MLOCKALL               151
+   152                              <1>   %define SYS_MMAP                   9  
+   153                              <1>   %define SYS_MODIFY_LDT             154
+   154                              <1>   %define SYS_MOUNT                  165
+   155                              <1>   %define SYS_MOVE_PAGES             279
+   156                              <1>   %define SYS_MPROTECT               10 
+   157                              <1>   %define SYS_MQ_GETSETATTR          245
+   158                              <1>   %define SYS_MQ_NOTIFY              244
+   159                              <1>   %define SYS_MQ_OPEN                240
+   160                              <1>   %define SYS_MQ_TIMEDRECEIVE        243
+   161                              <1>   %define SYS_MQ_TIMEDSEND           242
+   162                              <1>   %define SYS_MQ_UNLINK              241
+   163                              <1>   %define SYS_MREMAP                 25 
+   164                              <1>   %define SYS_MSGCTL                 71 
+   165                              <1>   %define SYS_MSGGET                 68
+   166                              <1>   %define SYS_MSGRCV                 70
+   167                              <1>   %define SYS_MSGSND                 69
+   168                              <1>   %define SYS_MSYNC                  26
+   169                              <1>   %define SYS_MUNLOCK                150
+   170                              <1>   %define SYS_MUNLOCKALL             152
+   171                              <1>   %define SYS_MUNMAP                 11 
+   172                              <1>   %define SYS_NANOSLEEP              35
+   173                              <1>   %define SYS_NEWFSTATAT             262
+   174                              <1>   %define SYS_NFSSERVCTL             180
+   175                              <1>   %define SYS_OPEN                   2
+   176                              <1>   %define SYS_OPENAT                 257
+   177                              <1>   %define SYS_PAUSE                  34 
+   178                              <1>   %define SYS_PERF_EVENT_OPEN        298
+   179                              <1>   %define SYS_PERSONALITY            135
+   180                              <1>   %define SYS_PIPE                   22 
+   181                              <1>   %define SYS_PIPE2                  293
+   182                              <1>   %define SYS_PIVOT_ROOT             155
+   183                              <1>   %define SYS_POLL                   7  
+   184                              <1>   %define SYS_PPOLL                  271
+   185                              <1>   %define SYS_PRCTL                  157
+   186                              <1>   %define SYS_PREAD64                17 
+   187                              <1>   %define SYS_PREADV                 295
+   188                              <1>   %define SYS_PRLIMIT64              302
+   189                              <1>   %define SYS_PSELECT6               270
+   190                              <1>   %define SYS_PTRACE                 101
+   191                              <1>   %define SYS_PUTPMSG                182
+   192                              <1>   %define SYS_PWRITE64               18 
+   193                              <1>   %define SYS_PWRITEV                296
+   194                              <1>   %define SYS_QUERY_MODULE           178
+   195                              <1>   %define SYS_QUOTACTL               179
+   196                              <1>   %define SYS_READ                   0  
+   197                              <1>   %define SYS_READAHEAD              187
+   198                              <1>   %define SYS_READLINK               89 
+   199                              <1>   %define SYS_READLINKAT             267
+   200                              <1>   %define SYS_READV                  19 
+   201                              <1>   %define SYS_REBOOT                 169
+   202                              <1>   %define SYS_RECVFROM               45 
+   203                              <1>   %define SYS_RECVMMSG               299
+   204                              <1>   %define SYS_RECVMSG                47 
+   205                              <1>   %define SYS_REMAP_FILE_PAGES       216
+   206                              <1>   %define SYS_REMOVEXATTR            197
+   207                              <1>   %define SYS_RENAME                 82 
+   208                              <1>   %define SYS_RENAMEAT               264
+   209                              <1>   %define SYS_REQUEST_KEY            249
+   210                              <1>   %define SYS_RESTART_SYSCALL        219
+   211                              <1>   %define SYS_RMDIR                  84 
+   212                              <1>   %define SYS_RT_SIGACTION           13
+   213                              <1>   %define SYS_RT_SIGPENDING          127
+   214                              <1>   %define SYS_RT_SIGPROCMASK         14 
+   215                              <1>   %define SYS_RT_SIGQUEUEINFO        129
+   216                              <1>   %define SYS_RT_SIGRETURN           15 
+   217                              <1>   %define SYS_RT_SIGSUSPEND          130
+   218                              <1>   %define SYS_RT_SIGTIMEDWAIT        128
+   219                              <1>   %define SYS_RT_TGSIGQUEUEINFO      297
+   220                              <1>   %define SYS_SCHED_GET_PRIORITY_MAX 146
+   221                              <1>   %define SYS_SCHED_GET_PRIORITY_MIN 147
+   222                              <1>   %define SYS_SCHED_GETAFFINITY      204
+   223                              <1>   %define SYS_SCHED_GETPARAM         143
+   224                              <1>   %define SYS_SCHED_GETSCHEDULER     145
+   225                              <1>   %define SYS_SCHED_RR_GET_INTERVAL  148
+   226                              <1>   %define SYS_SCHED_SETAFFINITY      203
+   227                              <1>   %define SYS_SCHED_SETPARAM         142
+   228                              <1>   %define SYS_SCHED_SETSCHEDULER     144
+   229                              <1>   %define SYS_SCHED_YIELD            24 
+   230                              <1>   %define SYS_SECURITY               185
+   231                              <1>   %define SYS_SELECT                 23 
+   232                              <1>   %define SYS_SEMCTL                 66 
+   233                              <1>   %define SYS_SEMGET                 64 
+   234                              <1>   %define SYS_SEMOP                  65 
+   235                              <1>   %define SYS_SEMTIMEDOP             220
+   236                              <1>   %define SYS_SENDFILE               40 
+   237                              <1>   %define SYS_SENDMSG                46 
+   238                              <1>   %define SYS_SENDTO                 44 
+   239                              <1>   %define SYS_SET_MEMPOLICY          238
+   240                              <1>   %define SYS_SET_ROBUST_LIST        273
+   241                              <1>   %define SYS_SET_THREAD_AREA        205
+   242                              <1>   %define SYS_SET_TID_ADDRESS        218
+   243                              <1>   %define SYS_SETDOMAINNAME          171
+   244                              <1>   %define SYS_SETFSGID               123
+   245                              <1>   %define SYS_SETFSUID               122
+   246                              <1>   %define SYS_SETGID                 106
+   247                              <1>   %define SYS_SETGROUPS              116
+   248                              <1>   %define SYS_SETHOSTNAME            170
+   249                              <1>   %define SYS_SETITIMER              38 
+   250                              <1>   %define SYS_SETPGID                109
+   251                              <1>   %define SYS_SETPRIORITY            141
+   252                              <1>   %define SYS_SETREGID               114
+   253                              <1>   %define SYS_SETRESGID              119
+   254                              <1>   %define SYS_SETRESUID              117
+   255                              <1>   %define SYS_SETREUID               113
+   256                              <1>   %define SYS_SETRLIMIT              160
+   257                              <1>   %define SYS_SETSID                 112
+   258                              <1>   %define SYS_SETSOCKOPT             54 
+   259                              <1>   %define SYS_SETTIMEOFDAY           164
+   260                              <1>   %define SYS_SETUID                 105
+   261                              <1>   %define SYS_SETXATTR               188
+   262                              <1>   %define SYS_SHMAT                  30 
+   263                              <1>   %define SYS_SHMCTL                 31 
+   264                              <1>   %define SYS_SHMDT                  67 
+   265                              <1>   %define SYS_SHMGET                 29 
+   266                              <1>   %define SYS_SHUTDOWN               48 
+   267                              <1>   %define SYS_SIGALTSTACK            131
+   268                              <1>   %define SYS_SIGNALFD               282
+   269                              <1>   %define SYS_SIGNALFD4              289
+   270                              <1>   %define SYS_SOCKET                 41 
+   271                              <1>   %define SYS_SOCKETPAIR             53 
+   272                              <1>   %define SYS_SPLICE                 275
+   273                              <1>   %define SYS_STAT                   4  
+   274                              <1>   %define SYS_STATFS                 137
+   275                              <1>   %define SYS_SWAPOFF                168
+   276                              <1>   %define SYS_SWAPON                 167
+   277                              <1>   %define SYS_SYMLINK                88 
+   278                              <1>   %define SYS_SYMLINKAT              266
+   279                              <1>   %define SYS_SYNC                   162
+   280                              <1>   %define SYS_SYNC_FILE_RANGE        277
+   281                              <1>   %define SYS__SYSCTL                156
+   282                              <1>   %define SYS_SYSFS                  139
+   283                              <1>   %define SYS_SYSINFO                99 
+   284                              <1>   %define SYS_SYSLOG                 103
+   285                              <1>   %define SYS_TEE                    276
+   286                              <1>   %define SYS_TGKILL                 234
+   287                              <1>   %define SYS_TIME                   201
+   288                              <1>   %define SYS_TIMER_CREATE           222
+   289                              <1>   %define SYS_TIMER_DELETE           226
+   290                              <1>   %define SYS_TIMER_GETOVERRUN       225
+   291                              <1>   %define SYS_TIMER_GETTIME          224
+   292                              <1>   %define SYS_TIMER_SETTIME          223
+   293                              <1>   %define SYS_TIMERFD_CREATE         283
+   294                              <1>   %define SYS_TIMERFD_GETTIME        287
+   295                              <1>   %define SYS_TIMERFD_SETTIME        286
+   296                              <1>   %define SYS_TIMES                  100
+   297                              <1>   %define SYS_TKILL                  200
+   298                              <1>   %define SYS_TRUNCATE               76 
+   299                              <1>   %define SYS_TUXCALL                184
+   300                              <1>   %define SYS_UMASK                  95 
+   301                              <1>   %define SYS_UMOUNT2                166
+   302                              <1>   %define SYS_UNAME                  63 
+   303                              <1>   %define SYS_UNLINK                 87 
+   304                              <1>   %define SYS_UNLINKAT               263
+   305                              <1>   %define SYS_UNSHARE                272
+   306                              <1>   %define SYS_USELIB                 134
+   307                              <1>   %define SYS_USTAT                  136
+   308                              <1>   %define SYS_UTIME                  132
+   309                              <1>   %define SYS_UTIMENSAT              280
+   310                              <1>   %define SYS_UTIMES                 235
+   311                              <1>   %define SYS_VFORK                  58 
+   312                              <1>   %define SYS_VHANGUP                153
+   313                              <1>   %define SYS_VMSPLICE               278
+   314                              <1>   %define SYS_VSERVER                236
+   315                              <1>   %define SYS_WAIT4                  61
+   316                              <1>   %define SYS_WAITID                 247
+   317                              <1>   %define SYS_WRITE                  1
+   318                              <1>   %define SYS_WRITEV                 20
+   319                              <1> 
+   320                              <1> %elif
+   321                              <1>      %warning "syscalls.inc already included" 
+   322                              <1> %endif
+   323                                  %include "termio.inc"
+   324                              <1> %ifndef _ASM_TERMIO_INC_
+   325                              <1> %define _ASM_TERMIO_INC_
+   326                              <1> 
+   327                              <1> ; possible input and output devices for the konsole
+   328                              <1> 
+   329                              <1> %define STDIN   0
+   330                              <1> %define STDOUT  1
+   331                              <1> %define STDERR  2
+   332                              <1> 
+   333                              <1> ;IOCTL values
+   334                              <1> %define TCGETS      5401h	; termios instruction to read flags
+   335                              <1> %define TCSETS      5402h	; termios instruction to write flags
+   336                              <1> %define TIOCGWINSZ  5413h	; winsize
+   337                              <1> 
+   338                              <1> %define ICANON       2
+   339                              <1> %define ECHO        10
+   340                              <1> 
+   341                              <1> ; *** STRUCTURES ***
+   342                              <1> 
+   343                              <1> STRUC TERMIOS_STRUC
+   344 00000000 <res 00000004>      <1>     .c_iflag:   resd    1   ; input mode flags
+   345 00000004 <res 00000004>      <1>     .c_oflag:   resd    1   ; output mode flags
+   346 00000008 <res 00000004>      <1>     .c_cflag:   resd    1   ; control mode flags
+   347 0000000C <res 00000004>      <1>     .c_lflag:   resd    1   ; local mode flags
+   348 00000010 <res 00000001>      <1>     .c_line:    resb    1   ; line discipline
+   349 00000011 <res 00000013>      <1>     .c_cc:      resb    19  ; control characters
+   350                              <1> ENDSTRUC
+   351                              <1> 
+   352                              <1> STRUC WINSIZE_STRUC
+   353 00000000 <res 00000008>      <1>     .rows:      resq    1
+   354 00000008 <res 00000008>      <1>     .cols:      resq    1
+   355 00000010 <res 00000008>      <1>     .xpixels:   resq    1       ; not used
+   356 00000018 <res 00000008>      <1>     .ypixels:   resq    1       ; not used
+   357                              <1> ENDSTRUC
+   358                              <1> 
+   359                              <1> ; *** MACROS ***
+   360                              <1> 
+   361                              <1> %macro TERMIOS 1
+   362                              <1>     %1: ISTRUC TERMIOS_STRUC
+   363                              <1>         at TERMIOS_STRUC.c_iflag, dd 0
+   364                              <1>         at TERMIOS_STRUC.c_oflag, dd 0
+   365                              <1>         at TERMIOS_STRUC.c_cflag, dd 0
+   366                              <1>         at TERMIOS_STRUC.c_lflag, dd 0
+   367                              <1>         at TERMIOS_STRUC.c_line,  db 0
+   368                              <1>         at TERMIOS_STRUC.c_cc,    times 19 db 0
+   369                              <1>     IEND
+   370                              <1>     %define %1.c_iflag %1+TERMIOS_STRUC.c_iflag
+   371                              <1>     %define %1.c_oflag %1+TERMIOS_STRUC.c_oflag
+   372                              <1>     %define %1.c_cflag %1+TERMIOS_STRUC.c_cflag
+   373                              <1>     %define %1.c_lflag %1+TERMIOS_STRUC.c_lflag
+   374                              <1>     %define %1.c_line %1+TERMIOS_STRUC.c_line
+   375                              <1>     %define %1.c_cc %1+TERMIOS_STRUC.c_cc
+   376                              <1> %endmacro
+   377                              <1> 
+   378                              <1> %macro WINSIZE 1
+   379                              <1>     %1: ISTRUC WINSIZE_STRUC
+   380                              <1>             at WINSIZE_STRUC.rows,    dq 0
+   381                              <1>             at WINSIZE_STRUC.cols,    dq 0
+   382                              <1>             at WINSIZE_STRUC.xpixels, dq 0
+   383                              <1>             at WINSIZE_STRUC.ypixels, dq 0
+   384                              <1>         IEND
+   385                              <1>     %define %1.rows     %1+WINSIZE_STRUC.rows
+   386                              <1>     %define %1.cols     %1+WINSIZE_STRUC.cols
+   387                              <1>     %define %1.xpixels  %1+WINSIZE_STRUC.xpixels
+   388                              <1>     %define %1.ypixels  %1+WINSIZE_STRUC.ypixels 
+   389                              <1> %endmacro
+   390                              <1> 
+   391                              <1> %elif
+   392                              <1>     %warning "termio.inc already included"
+   393                              <1> %endif
+   394                                  
+   395                                  section .data
+   396                                  
+   397                                  cookies:
+   398 00000000 5365742D436F6F6B69-         db "Set-Cookie:UserID=XYZ", 10
+   399 00000009 653A5573657249443D-
+   400 00000012 58595A0A           
+   401 00000016 5365742D436F6F6B69-         db "Set-Cookie:Password=XYZ123", 10
+   402 0000001F 653A50617373776F72-
+   403 00000028 643D58595A3132330A 
+   404 00000031 5365742D436F6F6B69-         db "Set-Cookie:Domain=www.agguro.be", 10
+   405 0000003A 653A446F6D61696E3D-
+   406 00000043 7777772E6167677572-
+   407 0000004C 6F2E62650A         
+   408 00000051 5365742D436F6F6B69-         db "Set-Cookie:Path=/", 10
+   409 0000005A 653A506174683D2F0A 
+   410 00000063 436F6E74656E742D74-         db "Content-type: text/html", 10, 10
+   411 0000006C 7970653A2074657874-
+   412 00000075 2F68746D6C0A0A     
+   413 0000007C 3C68746D6C3E3C6865-         db "<html><head><title>Set Cookies</title></head>"
+   414 00000085 61643E3C7469746C65-
+   415 0000008E 3E53657420436F6F6B-
+   416 00000097 6965733C2F7469746C-
+   417 000000A0 653E3C2F686561643E 
+   418 000000A9 3C626F64793E                db "<body>"
+   419 000000AF 3C7370616E3E436865-         db "<span>Check your browser's cookies for UserID, Password, Domain and Path cookie</span>"
+   420 000000B8 636B20796F75722062-
+   421 000000C1 726F77736572277320-
+   422 000000CA 636F6F6B6965732066-
+   423 000000D3 6F7220557365724944-
+   424 000000DC 2C2050617373776F72-
+   425 000000E5 642C20446F6D61696E-
+   426 000000EE 20616E642050617468-
+   427 000000F7 20636F6F6B69653C2F-
+   428 00000100 7370616E3E         
+   429 00000105 3C2F626F64793E              db "</body>"
+   430 0000010C 3C2F68746D6C3E              db "</html>"
+   431                                  cookies.length: equ $-cookies
+   432                                  
+   433                                  section .text
+   434                                          global _start
+   435                                  _start:
+   436                                  
+   437 00000000 BF01000000                   mov        rdi, STDOUT
+   438 00000005 48BE-                        mov        rsi, cookies
+   439 00000007 [0000000000000000] 
+   440 0000000F BA13010000                   mov        rdx, cookies.length
+   441 00000014 B801000000                   mov        rax, SYS_WRITE
+   442 00000019 0F05                         syscall
+   443 0000001B 4831FF                       xor        rdi, rdi
+   444 0000001E B83C000000                   mov        rax, SYS_EXIT
+   445 00000023 0F05                         syscall
