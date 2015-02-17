@@ -18,17 +18,8 @@ BITS 64
 
 [list -]
         %include "unistd.inc"
+        %include "sys/socket.inc"
 [list +]
-
-%define AF_INET       2
-%define AF_LOCAL      1
-%define SOCK_STREAM   1
-%define PF_INET       2
-%define PF_LOCAL      1
-%define IPPROTO_IP    0
-%define IPPROTO_TCP   6
-%define IPPROTO_UDP   17
-%define INADDR_ANY    0
 
 %define FTPHOST        0x0100007F                        ; host 127.0.0.1
 %define FTPPORT        0x1500                            ; port 21

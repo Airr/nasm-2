@@ -20,14 +20,11 @@
 BITS 64
 [list -]
       %include "unistd.inc"
-      %include "wait.inc"
+      %include "sys/wait.inc"
+      %include "sys/socket.inc"
 [list +]
 
-%define AF_INET       2
-%define SOCK_STREAM   1
-%define PF_INET       2
-%define IPPROTO_IP    0
-%define INADDR_ANY    0
+
 
 section .bss
  
