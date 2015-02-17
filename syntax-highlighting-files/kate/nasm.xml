@@ -696,6 +696,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
       <item>rep</item>
       <item>repe</item>
       <item>repne</item>
+      <item>repz</item>
+      <item>repnz</item>
       <item>rol</item>
       <item>ror</item>
       <item>rsdc</item>
