@@ -1,7 +1,7 @@
 %ifndef __ASM_GENERIC_MMAN_INC
 %define __ASM_GENERIC_MMAN_INC
 
-%include "mman-common.inc"
+%include "sys/mman-common.inc"
 
 %define MAP_GROWSDOWN	0x0100		; stack-like segment
 %define MAP_DENYWRITE	0x0800		; ETXTBSY

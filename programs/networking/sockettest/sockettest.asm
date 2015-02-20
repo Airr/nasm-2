@@ -1,15 +1,9 @@
-; name: httpsocket.asm
-; build: see makefile
+; socket.asm
 ;
-; example how to get a webpage from an http server (host:port)
+; example of a basic connection to a host:port
 ; basic error handling is used but can be (and must be) improved
-;  
-; feb 17, 2015 : found solution to get entire webpage instead of a buffer sized amount of bytes.
-;                should have used a loop, stupid me... :D
-;                thansk to : nikAizuddin
-;                          : 32 bit example : https://github.com/nikAizuddin/research_x86asm/blob/master/simple_networking/simple_networking.asm
-;                            build: nasm -f elf32 -g simple_networking.asm -l simple_networking.lst
-;                                   ld -melf_i386 -g simple_networking.o -o getsite
+;
+; Purpose: This program works together with the httpserver demo.
 
 BITS 64
 [list -]
@@ -17,29 +11,66 @@ BITS 64
       %include "sys/socket.inc"
 [list +]
 
-
-
 section .bss
  
-     sockfd:                 resq 1
-     sock_addr:              resq 1
-     buffer:                 resb 10240
+sockfd:                 resq 1
+sock_addr:              resq 1
+buffer:                 resb 1000
+.length:                equ  $-buffer
 
 section .data
 
 ; the message we will send to the server, for http server request we must change this to "GET / HTTP/1.1",10,10
-; but for test purposes I use hello world :).
 
-request:                db 'GET /tests/fitnessmegashop/index.php HTTP/1.1',10
-                        db 'Host: localhost', 10
-                        ;db 'User-Agent: HTMLGET 1.0', 10
-                        ; next lines will be used in an next release. Then I want to POST parameters to a website.
-                        db 'User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:34.0) Gecko/20100101 Firefox/34.0', 10, 10
-                        ;db 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',10
-                        ;db 'Accept-Language: en-US,en;q=0.5',10
-                        ;db 'Cookie: __utma=111872281.175751761.1418058653.1418058653.1418058653.1; __utmz=111872281.1418058653.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none)',10
-                        ;db 'Connection: keep-alive',10, 10
-                        db 10, 10
+request:                ;db 'POST /taxation_customs/vies/vatResponse.html HTTP/1.1',13, 10
+                        ;db 'Host: ec.europa.eu', 13, 10
+                        ;db 'User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:34.0) Gecko/20100101 Firefox/34.0', 13, 10
+                        ;; example data
+                        ;db 'Accept: application/json;text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',13, 10
+                        ;db 'Accept-Language: en-US,en;q=0.5',13, 10
+                        ;; not needed
+                        ;;db 'Accept-Encoding: gzip, deflate', 13, 10
+                        ;;db 'X-Requested-With: XMLHttpRequest', 13, 10
+                        ;db 'Referer: http://ec.europa.eu/taxation_customs/vies/vieshome.do', 10
+                        ;; not needed
+                        ;;db 'Cookie: JSESSIONID=zxptJvkJ2QlcjJzrsQgsjvwpyp9LYLK22hvRnwVPJxxldK6KxpvQ!-1772798430', 13, 10
+                        ;db 'Connection: close', 13, 10
+                        ;db 'Content-Type: application/x-www-form-urlencoded', 13, 10
+                        ;; content length is the length of the posted data -> should be calculated
+                        ;db 'Content-Length: 62', 13, 10, 13, 10
+                        ;; this is enough info, the entire post is:
+                        ;; memberStateCode=BE&number=0437882546&traderName=&traderStreet=&traderPostalCode=&traderCity=&requesterMemberStateCode=&requesterNumber=&action=check&check=Verify
+                        
+                        ;;;;  db 'memberStateCode=BE&number=0437882546&action=check&check=Verify'
+                        ;; will return : 
+                        ;; Yes, valid VAT number
+                        ;;
+                        ;; Member State               BE
+                        ;; VAT Number                 BE 0437882546
+                        ;; Date when request received 2015/02/17 08:53:02
+                        ;; Name                       BV BVBA CENTRUM VOOR MEDISCHE ANALYSE
+                        ;; Address                    OUD-STRIJDERSLAAN (HRT) 199
+                        ;;                            2200 HERENTALS
+                        ;db 'memberStateCode=BE&number=0823633037&action=check&check=Verify'
+                        ;; will return :
+                        ;; Yes, valid VAT number
+                        ;;
+                        ;; Member State   BE
+                        ;; VAT Number     BE 0823633037
+                        ;; Date when request received    2015/02/17 08:58:42
+                        ;; Name      BVBA ABSOTECH
+                        ;; Address   VAARTSTRAAT 2
+                        ;; 3191 BOORTMEERBEEK
+                        
+                        db 'GET /check/BE/0823633037 HTTP/1.1',13, 10
+                        db 'Host: localhost', 13, 10
+                        ;db 'User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:35.0) Gecko/20100101 Firefox/35.0', 10, 10
+                        db 'Accept: application/json', 13, 10
+                        db 'Accept-Language: en-US,en;q=0.5', 13, 10
+                        ;db 'Accept-Encoding: gzip, deflate', 13, 10
+                        db 'Connection: close', 13, 10
+                        db 13, 10
+                        
 request.length:         equ $-request
 socketerror:            db "socket error", 10
 .length:                equ $-socketerror
@@ -70,9 +101,9 @@ _start:
  
 ; fill in sock_addr structure (on stack)
         xor     r8, r8                   ; clear the value of r8
-        mov     r8, 0xBED1C554            ; agguro.no-ip.org 84.197.209.190  100007F (IP address : 127.0.0.1)
+        mov     r8, 0x8C8BB72E;            0x67774393           ; VIES VAT checker IP 147.67.119.103 (ec.europa.eu); 100007F (IP address : 127.0.0.1)
         push    r8                       ; push r8 to the stack
-        push    WORD 0x401F;             ; port 8000 (use 0x5C11 - port 4444 if you use the httpserver demo)
+        push    WORD 0x5000              ; port 80 push our port number to the stack (Port = 4444) don't use PUSH WORD 4444 (endianess!)
         push    WORD AF_INET             ; push protocol argument to the stack (AF_INET = 2)
         mov     QWORD[sock_addr], rsp    ; Save the sock_addr_in
 
@@ -101,13 +132,12 @@ _start:
         mov     r9, 0                           ; length of destination address structure
         syscall
 
-; receive data from the server
-
+; receive a message from the server
 .receive:
         mov     rax, SYS_RECVFROM
         mov     rdi, QWORD[sockfd]
         mov     rsi, buffer
-        mov     rdx, 1024                       ; buffer length
+        mov     rdx, buffer.length              ; buffer length
         mov     rcx, 0                          ; flags
         mov     r8, 0                           ; pointer to source address structure
         mov     r9, 0                           ; length of source address structure

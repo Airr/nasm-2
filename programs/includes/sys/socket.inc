@@ -1,7 +1,7 @@
 %ifndef __ASM_GENERIC_SOCKET_INC
 %define __ASM_GENERIC_SOCKET_INC
 
-%include "sockios.inc"
+%include "sys/sockios.inc"
 
 ; For setsockopt(2)
 
@@ -69,9 +69,15 @@
      %define SO_MAX_PACING_RATE    47
      
      %define AF_INET               2
+     %define AF_LOCAL              1
+
      %define SOCK_STREAM           1
      %define PF_INET               2
-     %define IPPROTO_IP            0
-     %define INADDR_ANY            0
+     %define PF_LOCAL              1
 
+     %define IPPROTO_IP            0
+     %define IPPROTO_TCP           6
+     %define IPPROTO_UDP           17
+     %define INADDR_ANY            0
+     
 %endif ; __ASM_GENERIC_SOCKET_INC

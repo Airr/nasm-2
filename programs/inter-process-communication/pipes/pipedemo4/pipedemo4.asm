@@ -43,7 +43,7 @@ section .data
   
     msg3:           db      "read ", 0x22                   ; ASCII for "
     .buffer:        times   data.length db 0
-                  db      0x22, 10
+                    db      0x22, 10
     .length:        equ     $-msg3
   
     pipeerror:      db      "pipe call error"
