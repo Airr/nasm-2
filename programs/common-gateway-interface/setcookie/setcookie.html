@@ -4,7 +4,7 @@
 <script src="js/jquery-min.js"></script>
 </head>
 <body>
-<form action="/cgi-bin/setcookie" id="cookieForm">
+<form action="/bin/setcookie" id="cookieForm" method="post">
 <pre><h1>Set Cookies</h1>
 
 <input type="submit" value="Set Cookies"></pre>
@@ -12,13 +12,7 @@
 <!-- the result of the search will be rendered inside this div -->
 <div id="result" style="color:red;"></div>
 <script>
-$( "#cookieForm" ).submit(function( event ) {
-    event.preventDefault();
-    var posting = $.post( "/cgi/setcookie");
-    posting.done(function( data ) {
-      $( "#result" ).empty().append( data );
-    });
-});
+
 </script>
 </body>
 </html>

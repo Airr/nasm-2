@@ -17,11 +17,7 @@ cookies:
     db "Set-Cookie:Domain=www.agguro.be", 10
     db "Set-Cookie:Path=/", 10
     db "Content-type: text/html", 10, 10
-    db "<html><head><title>Set Cookies</title></head>"
-    db "<body>"
-    db "<span>Check your browser's cookies for UserID, Password, Domain and Path cookie</span>"
-    db "</body>"
-    db "</html>"
+    db "<pre>Check your browser's cookies for UserID, Password, Domain and Path cookie</pre>"
 cookies.length: equ $-cookies
 
 section .text

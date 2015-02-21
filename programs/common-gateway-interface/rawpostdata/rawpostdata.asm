@@ -1,4 +1,3 @@
-;***********************************************************************************************
 ; Name:         rawpostdata.asm
 ; Build:        see makefile
 ; Description:  Get the posted data and display it in characters and hexadecimal values.
@@ -6,10 +5,7 @@
 ;               with (I hope) any CONTENT-TYPE.  I use this as a tool to see if data from a website
 ;               or from cgi is actually arrived, if not an error occured.
 ;               It is also a tool to exploit the header for file uploads. (but that's another example)
-; Use:          This program allow us to see the posted data from almost any website.
-; Disadvantage: Posted files contents can corrupt the output on the webbrowser, a work around wil
-;               be made soon and will show the file contents in hexademal.
-;***********************************************************************************************
+; Use:          This program allow us to see the posted data from any (???) website.
 
 BITS 64
 
@@ -17,8 +13,7 @@ BITS 64
 %define COLUMNS         16              ; 16 bytes in a row
 
 [list -]
-    %include "syscalls.inc"
-    %include "termio.inc"
+    %include "unistd.inc"
 [list +]
 
 section .bss
@@ -39,7 +34,6 @@ top:       db      'Content-type: text/html', 0x0A, 0x0A
            db      '<!DOCTYPE html><html><head>'
            db      '<title>Show RAW POST DATA</title>'
            db      '</head><body>'
-           ;db      '<h1>RAW POST DATA</h1>'
            db      '<pre><div id="chars" style="float:left;margin-right:100px;">'
 .length:   equ     $-top
 

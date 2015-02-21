@@ -1,8 +1,9 @@
 ; Name:     datadownload.asm
 ; Build:    see makefile
 ; Description:
-;   Demonstration of a simple downloadable file, the contents of the file are in the program.
-;   (It could be the binary of this program too.)
+; Demonstration of a simple downloadable file, the contents of the file are in the program.
+; (It could be the binary of this program too.)
+; A warning is in place. On localhost this program behaves sometimes bad, when post method was used. My Apache webserver often resets the connection.
 
 bits 64
 
@@ -13,7 +14,7 @@ section .data
 reply:
      db    'Content-Description: File Transfer', 10                                                       ; FOR I.E.
      db    'Content-type: application/octet-stream',10
-     db    'Content-Disposition: attachment',59,'filename="thisprogram.bin"',10                    ; 59 is ascii code for ';'
+     db    'Content-Disposition: attachment',59,'filename="data.bin"',10                    ; 59 is ascii code for ';'
      db    'Content-Transfer-Encoding: binary', 10
      db    'Expires: 0', 10
      db    'Cache-Control: must-revalidate', 10

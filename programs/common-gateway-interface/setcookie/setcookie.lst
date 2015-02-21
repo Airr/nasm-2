@@ -341,36 +341,28 @@
    341 00000063 436F6E74656E742D74-         db "Content-type: text/html", 10, 10
    342 0000006C 7970653A2074657874-
    343 00000075 2F68746D6C0A0A     
-   344 0000007C 3C68746D6C3E3C6865-         db "<html><head><title>Set Cookies</title></head>"
-   345 00000085 61643E3C7469746C65-
-   346 0000008E 3E53657420436F6F6B-
-   347 00000097 6965733C2F7469746C-
-   348 000000A0 653E3C2F686561643E 
-   349 000000A9 3C626F64793E                db "<body>"
-   350 000000AF 3C7370616E3E436865-         db "<span>Check your browser's cookies for UserID, Password, Domain and Path cookie</span>"
-   351 000000B8 636B20796F75722062-
-   352 000000C1 726F77736572277320-
-   353 000000CA 636F6F6B6965732066-
-   354 000000D3 6F7220557365724944-
-   355 000000DC 2C2050617373776F72-
-   356 000000E5 642C20446F6D61696E-
-   357 000000EE 20616E642050617468-
-   358 000000F7 20636F6F6B69653C2F-
-   359 00000100 7370616E3E         
-   360 00000105 3C2F626F64793E              db "</body>"
-   361 0000010C 3C2F68746D6C3E              db "</html>"
-   362                                  cookies.length: equ $-cookies
-   363                                  
-   364                                  section .text
-   365                                          global _start
-   366                                  _start:
-   367                                  
-   368 00000000 BF01000000                   mov        rdi, STDOUT
-   369 00000005 48BE-                        mov        rsi, cookies
-   370 00000007 [0000000000000000] 
-   371 0000000F BA13010000                   mov        rdx, cookies.length
-   372 00000014 B801000000                   mov        rax, SYS_WRITE
-   373 00000019 0F05                         syscall
-   374 0000001B 4831FF                       xor        rdi, rdi
-   375 0000001E B83C000000                   mov        rax, SYS_EXIT
-   376 00000023 0F05                         syscall
+   344 0000007C 3C7072653E43686563-         db "<pre>Check your browser's cookies for UserID, Password, Domain and Path cookie</pre>"
+   345 00000085 6B20796F7572206272-
+   346 0000008E 6F7773657227732063-
+   347 00000097 6F6F6B69657320666F-
+   348 000000A0 72205573657249442C-
+   349 000000A9 2050617373776F7264-
+   350 000000B2 2C20446F6D61696E20-
+   351 000000BB 616E64205061746820-
+   352 000000C4 636F6F6B69653C2F70-
+   353 000000CD 72653E             
+   354                                  cookies.length: equ $-cookies
+   355                                  
+   356                                  section .text
+   357                                          global _start
+   358                                  _start:
+   359                                  
+   360 00000000 BF01000000                   mov        rdi, STDOUT
+   361 00000005 48BE-                        mov        rsi, cookies
+   362 00000007 [0000000000000000] 
+   363 0000000F BAD0000000                   mov        rdx, cookies.length
+   364 00000014 B801000000                   mov        rax, SYS_WRITE
+   365 00000019 0F05                         syscall
+   366 0000001B 4831FF                       xor        rdi, rdi
+   367 0000001E B83C000000                   mov        rax, SYS_EXIT
+   368 00000023 0F05                         syscall
