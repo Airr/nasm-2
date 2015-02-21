@@ -1,0 +1,330 @@
+     1                                  ;;;;;;; webvars.asm ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     2                                  ;
+     3                                  ; Copyright (c) 2000 G. Adam Stanislav
+     4                                  ; All rights reserved.
+     5                                  ;
+     6                                  ; Redistribution and use in source and binary forms, with or without
+     7                                  ; modification, are permitted provided that the following conditions
+     8                                  ; are met:
+     9                                  ; 1. Redistributions of source code must retain the above copyright
+    10                                  ;    notice, this list of conditions and the following disclaimer.
+    11                                  ; 2. Redistributions in binary form must reproduce the above copyright
+    12                                  ;    notice, this list of conditions and the following disclaimer in the
+    13                                  ;    documentation and/or other materials provided with the distribution.
+    14                                  ;
+    15                                  ; THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS “AS IS” AND
+    16                                  ; ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+    17                                  ; IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+    18                                  ; ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+    19                                  ; FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+    20                                  ; DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+    21                                  ; OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+    22                                  ; HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+    23                                  ; LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+    24                                  ; OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+    25                                  ; SUCH DAMAGE.
+    26                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    27                                  ;
+    28                                  ; Version 1.0
+    29                                  ;
+    30                                  ; Started:  8-Dec-2000
+    31                                  ; Updated:  8-Dec-2000
+    32                                  ; Updated: 22-March-2013 to 64 bits by Agguro
+    33                                  ;
+    34                                  ; Build:
+    35                                  ; nasm -felf64 -o webvars.o webvars.asm
+    36                                  ; ld webvars.o -o webvars
+    37                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    38                                  
+    39                                  BITS 64
+    40                                  
+    41                                  %define SYS_EXIT    60
+    42                                  %define SYS_WRITE   1
+    43                                  %define SYS_READ    0
+    44                                  %define STDOUT      1
+    45                                  %define STDIN       0
+    46                                  
+    47                                  %MACRO sys.read 0
+    48                                      mov rax, SYS_READ
+    49                                      syscall
+    50                                  %ENDMACRO
+    51                                  
+    52                                  %MACRO sys.write 0
+    53                                      mov rax, SYS_WRITE
+    54                                      syscall
+    55                                  %ENDMACRO
+    56                                  
+    57                                  %MACRO sys.exit 0
+    58                                      mov rax, SYS_EXIT
+    59                                      syscall
+    60                                  %ENDMACRO
+    61                                   
+    62                                  %macro STRING 1
+    63                                      db %1
+    64                                  %endmacro
+    65                                  
+    66                                  section .bss
+    67                                  
+    68                                  section .data
+    69                                  
+    70                                  http:
+    71                                      STRING {'Content-type: text/html',0x0A,0x0A}
+    72 00000000 436F6E74656E742D74- <1>  db %1
+    73 00000009 7970653A2074657874- <1>
+    74 00000012 2F68746D6C0A0A      <1>
+    75                                      STRING {'<?xml version="1.0" encoding="UTF-8" />',0x0A}
+    76 00000019 3C3F786D6C20766572- <1>  db %1
+    77 00000022 73696F6E3D22312E30- <1>
+    78 0000002B 2220656E636F64696E- <1>
+    79 00000034 673D225554462D3822- <1>
+    80 0000003D 202F3E0A            <1>
+    81                                      STRING {"<!DOCTYPE html public '-//W3C/DTD XHTML Strict//EN' 'DTD/xhtml1-strict.dtd' />",0x0A}
+    82 00000041 3C21444F4354595045- <1>  db %1
+    83 0000004A 2068746D6C20707562- <1>
+    84 00000053 6C696320272D2F2F57- <1>
+    85 0000005C 33432F445444205848- <1>
+    86 00000065 544D4C205374726963- <1>
+    87 0000006E 742F2F454E27202744- <1>
+    88 00000077 54442F7868746D6C31- <1>
+    89 00000080 2D7374726963742E64- <1>
+    90 00000089 746427202F3E0A      <1>
+    91                                      STRING {'<html xmlns="http://www.w3.org/1999/xhtml" xml.lang="en" lang="en">',0x0A}
+    92 00000090 3C68746D6C20786D6C- <1>  db %1
+    93 00000099 6E733D22687474703A- <1>
+    94 000000A2 2F2F7777772E77332E- <1>
+    95 000000AB 6F72672F313939392F- <1>
+    96 000000B4 7868746D6C2220786D- <1>
+    97 000000BD 6C2E6C616E673D2265- <1>
+    98 000000C6 6E22206C616E673D22- <1>
+    99 000000CF 656E223E0A          <1>
+   100                                      STRING {'<head>',0x0A}
+   101 000000D4 3C686561643E0A      <1>  db %1
+   102                                      STRING {'<title>Web Environment</title>'}
+   103 000000DB 3C7469746C653E5765- <1>  db %1
+   104 000000E4 6220456E7669726F6E- <1>
+   105 000000ED 6D656E743C2F746974- <1>
+   106 000000F6 6C653E              <1>
+   107                                      STRING {'<meta name="author" content="G. Adam Stanislav" />',0x0A}
+   108 000000F9 3C6D657461206E616D- <1>  db %1
+   109 00000102 653D22617574686F72- <1>
+   110 0000010B 2220636F6E74656E74- <1>
+   111 00000114 3D22472E204164616D- <1>
+   112 0000011D 205374616E69736C61- <1>
+   113 00000126 7622202F3E0A        <1>
+   114                                      STRING {'<link type="text/css" href="/css/template.css" rel="stylesheet" />'}
+   115 0000012C 3C6C696E6B20747970- <1>  db %1
+   116 00000135 653D22746578742F63- <1>
+   117 0000013E 73732220687265663D- <1>
+   118 00000147 222F6373732F74656D- <1>
+   119 00000150 706C6174652E637373- <1>
+   120 00000159 222072656C3D227374- <1>
+   121 00000162 796C65736865657422- <1>
+   122 0000016B 202F3E              <1>
+   123                                      STRING {'</head>',0x0A}
+   124 0000016E 3C2F686561643E0A    <1>  db %1
+   125                                      STRING {'<body>',0x0A}
+   126 00000176 3C626F64793E0A      <1>  db %1
+   127                                      STRING {'<div class="webvars">',0x0A}
+   128 0000017D 3C64697620636C6173- <1>  db %1
+   129 00000186 733D22776562766172- <1>
+   130 0000018F 73223E0A            <1>
+   131                                      STRING {'<h1>Web Environment</h1>',0x0A}
+   132 00000193 3C68313E5765622045- <1>  db %1
+   133 0000019C 6E7669726F6E6D656E- <1>
+   134 000001A5 743C2F68313E0A      <1>
+   135                                      STRING {'<p>The following <b>environment variables</b> are defined on this web server:</p>',0x0A}
+   136 000001AC 3C703E54686520666F- <1>  db %1
+   137 000001B5 6C6C6F77696E67203C- <1>
+   138 000001BE 623E656E7669726F6E- <1>
+   139 000001C7 6D656E742076617269- <1>
+   140 000001D0 61626C65733C2F623E- <1>
+   141 000001D9 206172652064656669- <1>
+   142 000001E2 6E6564206F6E207468- <1>
+   143 000001EB 697320776562207365- <1>
+   144 000001F4 727665723A3C2F703E- <1>
+   145 000001FD 0A                  <1>
+   146                                      STRING {'<table align="center" width="100',0x25,'" border="0" cellpadding="5" cellspacing="0" class="webvars">',0x0A}
+   147 000001FE 3C7461626C6520616C- <1>  db %1
+   148 00000207 69676E3D2263656E74- <1>
+   149 00000210 657222207769647468- <1>
+   150 00000219 3D2231303025222062- <1>
+   151 00000222 6F726465723D223022- <1>
+   152 0000022B 2063656C6C70616464- <1>
+   153 00000234 696E673D2235222063- <1>
+   154 0000023D 656C6C73706163696E- <1>
+   155 00000246 673D22302220636C61- <1>
+   156 0000024F 73733D227765627661- <1>
+   157 00000258 7273223E0A          <1>
+   158                                  httplen:    equ $-http
+   159                                  
+   160                                  left:
+   161                                      STRING {'<tr>',0x0A,'<td class="name"><tt>'}
+   162 0000025D 3C74723E0A3C746420- <1>  db %1
+   163 00000266 636C6173733D226E61- <1>
+   164 0000026F 6D65223E3C74743E    <1>
+   165                                  leftlen:    equ $-left
+   166                                  
+   167                                  middle:
+   168                                      STRING {'</tt></td>',0x0A,'<td class="value"><tt><b>'}
+   169 00000277 3C2F74743E3C2F7464- <1>  db %1
+   170 00000280 3E0A3C746420636C61- <1>
+   171 00000289 73733D2276616C7565- <1>
+   172 00000292 223E3C74743E3C623E  <1>
+   173                                  midlen:     equ $-middle
+   174                                  
+   175                                  undef:
+   176                                      STRING {'<i>(undefined)</i>'}
+   177 0000029B 3C693E28756E646566- <1>  db %1
+   178 000002A4 696E6564293C2F693E  <1>
+   179                                  undeflen:   equ $-undef
+   180                                  
+   181                                  right:
+   182                                      STRING {'</b></tt></td>',0x0A,'</tr>',0x0A}
+   183 000002AD 3C2F623E3C2F74743E- <1>  db %1
+   184 000002B6 3C2F74643E0A3C2F74- <1>
+   185 000002BF 723E0A              <1>
+   186                                  rightlen:   equ $-right
+   187                                  
+   188                                  wrap:
+   189                                      STRING {'</table>',0x0A,'</div>',0x0A,'</body>',0x0A,'</html>',0x0A,0x0A}
+   190 000002C2 3C2F7461626C653E0A- <1>  db %1
+   191 000002CB 3C2F6469763E0A3C2F- <1>
+   192 000002D4 626F64793E0A3C2F68- <1>
+   193 000002DD 746D6C3E0A0A        <1>
+   194                                  wraplen:    equ $-wrap
+   195                                    
+   196                                  section .text
+   197                                          global _start
+   198                                          
+   199                                  _start:
+   200                                      
+   201                                       ; first, send out all the http and xhtml stuff that is
+   202                                       ; needed before we start showing the environment
+   203 00000000 48BE-                        mov       rsi, http
+   204 00000002 [0000000000000000] 
+   205 0000000A BA5D020000                   mov       rdx, httplen
+   206 0000000F BF01000000                   mov       rdi, STDOUT
+   207                                       sys.write
+   208 00000014 B801000000          <1>  mov rax, SYS_WRITE
+   209 00000019 0F05                <1>  syscall
+   210                                       
+   211                                       ; now find how far on the stack the environment pointers are.
+   212                                       ; we need to remove the following from the stack:
+   213                                       ;   8 bytes of argc
+   214                                       ;   RAX * 8 bytes of argv
+   215                                       ;   8 bytes of the NULL after argv
+   216                                       ;
+   217                                       ; Total 16 + RAX * 8
+   218                                       ;
+   219                                       ; Because the stack grows down, we need to ADD that many bytes
+   220                                       ; to RSP
+   221 0000001B 58                           pop       rax
+   222 0000001C 58                           pop       rax
+   223 0000001D 58                           pop       rax
+   224 0000001E FC                           cld                             ; this should already be the case, but let's be sure
+   225                                       
+   226                                       ; loop through the environment, printing it out
+   227                                  .loop:
+   228 0000001F 5F                           pop       rdi
+   229 00000020 4809FF                       or        rdi, rdi                ; done yet?
+   230 00000023 0F84BE000000                 je        .wrap
+   231                                       
+   232                                       ; print the left part of HTML
+   233 00000029 57                           push      rdi
+   234 0000002A 51                           push      rcx
+   235 0000002B 48BE-                        mov       rsi, left
+   236 0000002D [5D02000000000000] 
+   237 00000035 BA1A000000                   mov       rdx, leftlen
+   238 0000003A BF01000000                   mov       rdi, STDOUT
+   239                                       sys.write
+   240 0000003F B801000000          <1>  mov rax, SYS_WRITE
+   241 00000044 0F05                <1>  syscall
+   242 00000046 59                           pop       rcx
+   243 00000047 5F                           pop       rdi
+   244                                       
+   245                                       ; It may be tempting to search for the '=' in the env string next.
+   246                                       ; But it is possible there is no '=', so we search for the terminating
+   247                                       ; NUL first
+   248                                       
+   249 00000048 4889FE                       mov       rsi, rdi                ; save start of string
+   250 0000004B 4829C9                       sub       rcx, rcx
+   251 0000004E 48F7D1                       not       rcx                     ; RCX = FFFFFFFFFFFFFFFF
+   252 00000051 4829C0                       sub       rax, rax
+   253 00000054 F2AE                         repne     scasb
+   254 00000056 48F7D1                       not       rcx                     ; RCX = string length + 1
+   255 00000059 4889CB                       mov       rbx, rcx                ; save it in RBX
+   256                                       
+   257                                       ; now it's time to find '='
+   258 0000005C 4889F7                       mov       rdi, rsi                ; start of string
+   259 0000005F B03D                         mov       al, '='
+   260 00000061 F2AE                         repne     scasb
+   261 00000063 48F7D1                       not       rcx
+   262 00000066 4801D9                       add       rcx, rbx                ; length of name
+   263                                       
+   264 00000069 57                           push      rdi
+   265 0000006A 51                           push      rcx
+   266 0000006B 4889CA                       mov       rdx, rcx                ; length of name
+   267 0000006E BF01000000                   mov       rdi, STDOUT
+   268                                       sys.write
+   269 00000073 B801000000          <1>  mov rax, SYS_WRITE
+   270 00000078 0F05                <1>  syscall
+   271                                       
+   272                                       ; print the middle part of HTML table code
+   273 0000007A 48BE-                        mov       rsi, middle
+   274 0000007C [7702000000000000] 
+   275 00000084 BA24000000                   mov       rdx, midlen
+   276 00000089 BF01000000                   mov       rdi, STDOUT
+   277                                       sys.write
+   278 0000008E B801000000          <1>  mov rax, SYS_WRITE
+   279 00000093 0F05                <1>  syscall
+   280 00000095 59                           pop       rcx
+   281 00000096 5F                           pop       rdi
+   282                                       
+   283                                       ; find the length of the value
+   284 00000097 48F7D1                       not       rcx
+   285 0000009A 488D5C0BFF                   lea       rbx, [rbx+rcx-1]
+   286                                       
+   287                                       ; print "undefined" if 0
+   288 0000009F 4809DB                       or        rbx, rbx
+   289 000000A2 7511                         jne       .value
+   290                                  
+   291 000000A4 48BE-                        mov       rsi, undef
+   292 000000A6 [9B02000000000000] 
+   293 000000AE BA12000000                   mov       rdx, undeflen
+   294 000000B3 EB06                         jmp       .write
+   295                                  
+   296                                  .value:
+   297 000000B5 4889DA                       mov       rdx, rbx
+   298 000000B8 4889FE                       mov       rsi, rdi
+   299                                  .write:    
+   300 000000BB BF01000000                   mov       rdi, STDOUT
+   301                                       sys.write
+   302 000000C0 B801000000          <1>  mov rax, SYS_WRITE
+   303 000000C5 0F05                <1>  syscall
+   304                                  
+   305                                       ; print the right part of the table row
+   306 000000C7 48BE-                        mov       rsi, right
+   307 000000C9 [AD02000000000000] 
+   308 000000D1 BA15000000                   mov       rdx, rightlen
+   309 000000D6 BF01000000                   mov       rdi, STDOUT
+   310                                       sys.write
+   311 000000DB B801000000          <1>  mov rax, SYS_WRITE
+   312 000000E0 0F05                <1>  syscall
+   313                                  
+   314 000000E2 E938FFFFFF                   jmp       .loop
+   315                                  
+   316                                  .wrap:
+   317                                       ; print the rest of HTML
+   318 000000E7 48BE-                        mov       rsi, wrap
+   319 000000E9 [C202000000000000] 
+   320 000000F1 BA21000000                   mov       rdx, wraplen
+   321 000000F6 BF01000000                   mov       rdi, STDOUT
+   322                                       sys.write
+   323 000000FB B801000000          <1>  mov rax, SYS_WRITE
+   324 00000100 0F05                <1>  syscall
+   325                                  
+   326                                       ; return success
+   327 00000102 4831FF                       xor       rdi, rdi
+   328                                       sys.exit
+   329 00000105 B83C000000          <1>  mov rax, SYS_EXIT
+   330 0000010A 0F05                <1>  syscall
