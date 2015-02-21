@@ -1,13 +1,6 @@
-.PHONY: again
-.PHONY: debug
-.PHONY: clean
-.PHONY: install
-.PHONY: test
-
 NAME=webvars
 AS=nasm
 LD=ld
-
 O           = .o
 ASM         = .asm
 INC         = .inc
@@ -21,6 +14,12 @@ CGIROOT     = ~/Http/bin/
 BROWSER     = /usr/bin/firefox
 
 OBJS = $(NAME)$(O)
+
+.PHONY: again
+.PHONY: debug
+.PHONY: clean
+.PHONY: install
+.PHONY: test
 
 $(NAME): $(OBJS)
 	$(LD) $(LDFLAGS) -o $(NAME) $(OBJS) $(LIBS)
@@ -40,7 +39,7 @@ clean:
 # here it is assumed that /js/jquery-min.js exists in the webroot	
 install:
 	$(MAKE) clean
-	$(MAKE) all
+	$(MAKE)
 	cp $(NAME).html $(WEBROOT)
 	cp $(NAME) $(CGIROOT)
 	

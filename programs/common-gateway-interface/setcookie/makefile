@@ -25,4 +25,4 @@ debug:
 	$(MAKE) $(NAME) ASFLAGS="-felf64 -Fstabs -g" LDFLAGS="-g -melf_x86_64"
 	valgrind --tool=callgrind --dump-instr=yes --collect-jumps=yes ./$(NAME)
 clean:
-	rm *.out.* $(NAME) $(NAME)$(LST) $(NAME)$(O)
+	@rm -f *.out.* $(NAME) $(NAME)$(LST) $(NAME)$(O)

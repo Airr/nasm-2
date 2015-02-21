@@ -1,16 +1,13 @@
-;***********************************************************************************************
 ; Name:         setcookie.asm
 ; Build:        see makefile
 ; Description:  set 4 cookies
-;               This isn't a state-of-the-art program but to be complete on cgi applications it's
-;               a nice example on how to set cookies.
+;               Send cookies to web client demo
 ;               The executable of this file need to be uploaded to your webservers cgi directory
 ;               from there you can access the application from a webbrowser.
-;***********************************************************************************************
+
 bits 64
 
-%include "syscalls.inc"
-%include "termio.inc"
+%include "unistd.inc"
 
 section .data
 
