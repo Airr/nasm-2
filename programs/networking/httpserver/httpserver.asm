@@ -49,12 +49,16 @@ buffer:                   times 1024 db 0
  
 ; A full webserver reply 200.  We can send other pages too. A full list of status codes can be found at
 ; http://en.wikipedia.org/wiki/List_of_HTTP_status_codes
-reply:                  db 'HTTP/1.1 200 OK',10
+
+reply:               ;   db 'HTTP/1.1 301 Moved Permanently', 10
+                     ;   db 'Location: http://www.agguro.be/index.php', 10, 10   <-- example of redirect -->
+                     
+                        db 'HTTP/1.1 200 OK',10
                         db 'Server: demo web server',10               ; change 'demo web server' to your own name
-                     ;  db 'Set-Cookie:UserID=XYZ', 10                ; change the cookies and un remark them if you like 
-                     ;  db 'Set-Cookie:Password=XYZ123', 10
-                     ;  db 'Set-Cookie:Domain=www.agguro.be', 10
-                     ;  db 'Set-Cookie:Path=/', 10
+                        db 'Set-Cookie:UserID=XYZ', 10                ; change the cookies and un remark them if you like 
+                        db 'Set-Cookie:Password=XYZ123', 10
+                        db 'Set-Cookie:Domain=www.agguro.be', 10
+                        db 'Set-Cookie:Path=/', 10
                         db 'Content-length: 296',10                   ; the length of the webpage we will send back, calculated last-first+1
                         db 'Content-Type: text/html',10,10            ; the content type
                         db '<!DOCTYPE html><html>'

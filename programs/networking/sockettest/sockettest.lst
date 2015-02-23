@@ -1,0 +1,240 @@
+     1                                  ; socket.asm
+     2                                  ;
+     3                                  ; example of a basic connection to a host:port
+     4                                  ; basic error handling is used but can be (and must be) improved
+     5                                  ;
+     6                                  ; Purpose: This program works together with the httpserver demo.
+     7                                  
+     8                                  BITS 64
+   422                                  [list -]
+   423                                  
+   424                                  section .bss
+   425                                   
+   426 00000000 <res 00000008>          sockfd:                 resq 1
+   427 00000008 <res 00000008>          sock_addr:              resq 1
+   428 00000010 <res 000003E8>          buffer:                 resb 1000
+   429                                  .length:                equ  $-buffer
+   430                                  
+   431                                  section .data
+   432                                  
+   433                                  ; the message we will send to the server, for http server request we must change this to "GET / HTTP/1.1",10,10
+   434                                  
+   435                                  request:                ;db 'POST /taxation_customs/vies/vatResponse.html HTTP/1.1',13, 10
+   436                                                          ;db 'Host: ec.europa.eu', 13, 10
+   437                                                          ;db 'User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:34.0) Gecko/20100101 Firefox/34.0', 13, 10
+   438                                                          ;; example data
+   439                                                          ;db 'Accept: application/json;text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',13, 10
+   440                                                          ;db 'Accept-Language: en-US,en;q=0.5',13, 10
+   441                                                          ;; not needed
+   442                                                          ;;db 'Accept-Encoding: gzip, deflate', 13, 10
+   443                                                          ;;db 'X-Requested-With: XMLHttpRequest', 13, 10
+   444                                                          ;db 'Referer: http://ec.europa.eu/taxation_customs/vies/vieshome.do', 10
+   445                                                          ;; not needed
+   446                                                          ;;db 'Cookie: JSESSIONID=zxptJvkJ2QlcjJzrsQgsjvwpyp9LYLK22hvRnwVPJxxldK6KxpvQ!-1772798430', 13, 10
+   447                                                          ;db 'Connection: close', 13, 10
+   448                                                          ;db 'Content-Type: application/x-www-form-urlencoded', 13, 10
+   449                                                          ;; content length is the length of the posted data -> should be calculated
+   450                                                          ;db 'Content-Length: 62', 13, 10, 13, 10
+   451                                                          ;; this is enough info, the entire post is:
+   452                                                          ;; memberStateCode=BE&number=0437882546&traderName=&traderStreet=&traderPostalCode=&traderCity=&requesterMemberStateCode=&requesterNumber=&action=check&check=Verify
+   453                                                          
+   454                                                          ;;;;  db 'memberStateCode=BE&number=0437882546&action=check&check=Verify'
+   455                                                          ;; will return : 
+   456                                                          ;; Yes, valid VAT number
+   457                                                          ;;
+   458                                                          ;; Member State               BE
+   459                                                          ;; VAT Number                 BE 0437882546
+   460                                                          ;; Date when request received 2015/02/17 08:53:02
+   461                                                          ;; Name                       BV BVBA CENTRUM VOOR MEDISCHE ANALYSE
+   462                                                          ;; Address                    OUD-STRIJDERSLAAN (HRT) 199
+   463                                                          ;;                            2200 HERENTALS
+   464                                                          ;db 'memberStateCode=BE&number=0823633037&action=check&check=Verify'
+   465                                                          ;; will return :
+   466                                                          ;; Yes, valid VAT number
+   467                                                          ;;
+   468                                                          ;; Member State   BE
+   469                                                          ;; VAT Number     BE 0823633037
+   470                                                          ;; Date when request received    2015/02/17 08:58:42
+   471                                                          ;; Name      BVBA ABSOTECH
+   472                                                          ;; Address   VAARTSTRAAT 2
+   473                                                          ;; 3191 BOORTMEERBEEK
+   474                                                          
+   475                                                          ;db 'POST /bin/getpostparams HTTP/1.1', 13, 10
+   476                                                          ;db 'User-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)', 13, 10
+   477                                                          ;db 'Host: www.tutorialspoint.com', 13, 10
+   478                                                          ;db 'Accept-Language: en-us', 13, 10
+   479                                                          ;db 'Content-Length: 15', 13, 10
+   480                                                          ;db 'Connection: close', 13, 10, 13, 10 ;Keep-Alive', 13, 10, 13, 10
+   481                                                          ;db 'a=10&b=20&c=a+b'
+   482 00000000 505554202F68656C6C-                             db 'PUT /hello.html HTTP/1.1',10
+   483 00000009 6F2E68746D6C204854-
+   484 00000012 54502F312E310A     
+   485 00000019 557365722D4167656E-                             db 'User-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)',10
+   486 00000022 743A204D6F7A696C6C-
+   487 0000002B 612F342E302028636F-
+   488 00000034 6D70617469626C653B-
+   489 0000003D 204D534945352E3031-
+   490 00000046 3B2057696E646F7773-
+   491 0000004F 204E54290A         
+   492 00000054 486F73743A20777777-                             db 'Host: www.tutorialspoint.com',10
+   493 0000005D 2E7475746F7269616C-
+   494 00000066 73706F696E742E636F-
+   495 0000006F 6D0A               
+   496 00000071 4163636570742D4C61-                             db 'Accept-Language: en-us',10
+   497 0000007A 6E67756167653A2065-
+   498 00000083 6E2D75730A         
+   499 00000088 436F6E6E656374696F-                             db 'Connection: Keep-Alive',10
+   500 00000091 6E3A204B6565702D41-
+   501 0000009A 6C6976650A         
+   502 0000009F 436F6E74656E742D74-                             db 'Content-type: text/html',10
+   503 000000A8 7970653A2074657874-
+   504 000000B1 2F68746D6C0A       
+   505 000000B7 436F6E74656E742D4C-                             db 'Content-Length: 182',10,10
+   506 000000C0 656E6774683A203138-
+   507 000000C9 320A0A             
+   508 000000CC 3C68746D6C3E3C626F-                             db '<html><body><h1>Hello, World!</h1></body></html>'
+   509 000000D5 64793E3C68313E4865-
+   510 000000DE 6C6C6F2C20576F726C-
+   511 000000E7 64213C2F68313E3C2F-
+   512 000000F0 626F64793E3C2F6874-
+   513 000000F9 6D6C3E             
+   514                                                          
+   515                                  request.length:         equ $-request
+   516 000000FC 736F636B6574206572-     socketerror:            db "socket error", 10
+   517 00000105 726F720A           
+   518                                  .length:                equ $-socketerror
+   519 00000109 636F6E6E656374696F-     connecterror:           db "connection error", 10
+   520 00000112 6E206572726F720A   
+   521                                  .length:                equ $-connecterror
+   522 0000011A 436F6E6E6563746564-     connected:              db "Connected", 10
+   523 00000123 0A                 
+   524                                  .length:                equ $-connected
+   525 00000124 436F6E6E656374696F-     disconnected:           db "Connection closed", 10
+   526 0000012D 6E20636C6F7365640A 
+   527                                  .length:                equ $-disconnected
+   528                                  
+   529 00000136 0A                      crlf:                   db 10
+   530                                  
+   531                                  section .text
+   532                                   
+   533                                  global _start
+   534                                   
+   535                                  _start:
+   536                                   
+   537                                  ; create a socket
+   538 00000000 B829000000                      mov     rax, SYS_SOCKET          ; call socket(SOCK_STREAM, AF_NET, 0);
+   539 00000005 BF02000000                      mov     rdi, PF_INET             ; PF_INET = 2
+   540 0000000A BE01000000                      mov     rsi, SOCK_STREAM         ; SOCK_STREAM = 1
+   541 0000000F 4831D2                          xor     rdx, rdx                 ; IPPROTO_IP = 0
+   542 00000012 0F05                            syscall
+   543 00000014 4821C0                          and     rax, rax
+   544 00000017 0F8C40010000                    jl      .socketerror
+   545 0000001D 48890425[00000000]              mov     QWORD[sockfd], rax       ; save descriptor
+   546                                   
+   547                                  ; fill in sock_addr structure (on stack)
+   548 00000025 4D31C0                          xor     r8, r8                   ; clear the value of r8
+   549 00000028 41B87F000001                    mov     r8, 0x0100007F;          ; 8C8BB72E;            0x67774393           ; VIES VAT checker IP 147.67.119.103 (ec.europa.eu); 100007F (IP address : 127.0.0.1)
+   550 0000002E 4150                            push    r8                       ; push r8 to the stack
+   551 00000030 66680050                        push    WORD 0x5000              ; port 80 push our port number to the stack (Port = 4444) don't use PUSH WORD 4444 (endianess!)
+   552 00000034 666A02                          push    WORD AF_INET             ; push protocol argument to the stack (AF_INET = 2)
+   553 00000037 48892425[08000000]              mov     QWORD[sock_addr], rsp    ; Save the sock_addr_in
+   554                                  
+   555                                  ; connect to the remote host
+   556 0000003F B82A000000                      mov     rax, SYS_CONNECT         ; 
+   557 00000044 488B3C25[00000000]              mov     rdi, QWORD[sockfd]       ; socket descriptor
+   558 0000004C 488B3425[08000000]              mov     rsi, QWORD[sock_addr]    ; sock_addr structure
+   559 00000054 BA10000000                      mov     rdx, 16                  ; length of sock_addr structure
+   560 00000059 0F05                            syscall
+   561 0000005B 4821C0                          and     rax, rax
+   562 0000005E 0F8CE8000000                    jl      .connecterror
+   563                                          
+   564 00000064 48BE-                           mov     rsi, connected
+   565 00000066 [1A01000000000000] 
+   566 0000006E BA0A000000                      mov     rdx, connected.length
+   567 00000073 BF01000000                      mov     rdi, STDOUT
+   568 00000078 B801000000                      mov     rax, SYS_WRITE
+   569 0000007D 0F05                            syscall
+   570                                          
+   571                                  ; send the message to the server
+   572 0000007F B82C000000                      mov     rax, SYS_SENDTO
+   573 00000084 488B3C25[00000000]              mov     rdi, QWORD[sockfd]
+   574 0000008C 48BE-                           mov     rsi, request
+   575 0000008E [0000000000000000] 
+   576 00000096 BAFC000000                      mov     rdx, request.length
+   577 0000009B B900000000                      mov     rcx, 0                          ; flags
+   578 000000A0 41B800000000                    mov     r8, 0                           ; pointer to destination address structure
+   579 000000A6 41B900000000                    mov     r9, 0                           ; length of destination address structure
+   580 000000AC 0F05                            syscall
+   581                                  
+   582                                  ; receive a message from the server
+   583                                  .receive:
+   584 000000AE B82D000000                      mov     rax, SYS_RECVFROM
+   585 000000B3 488B3C25[00000000]              mov     rdi, QWORD[sockfd]
+   586 000000BB 48BE-                           mov     rsi, buffer
+   587 000000BD [1000000000000000] 
+   588 000000C5 BAE8030000                      mov     rdx, buffer.length              ; buffer length
+   589 000000CA B900000000                      mov     rcx, 0                          ; flags
+   590 000000CF 41B800000000                    mov     r8, 0                           ; pointer to source address structure
+   591 000000D5 41B900000000                    mov     r9, 0                           ; length of source address structure
+   592 000000DB 0F05                            syscall
+   593 000000DD 4821C0                          and     rax, rax
+   594 000000E0 741B                            jz      .endreceive
+   595                                  
+   596                                  ; write contents of the buffer to stdout, rax has the bytes read
+   597 000000E2 4889C2                          mov     rdx, rax                        ; bytes read in rdx
+   598 000000E5 B801000000                      mov     rax, SYS_WRITE
+   599 000000EA BF01000000                      mov     rdi, STDOUT
+   600 000000EF 48BE-                           mov     rsi, buffer
+   601 000000F1 [1000000000000000] 
+   602 000000F9 0F05                            syscall
+   603 000000FB EBB1                            jmp     .receive
+   604                                          
+   605                                  .endreceive:        
+   606                                  ; additional CRLF
+   607 000000FD B801000000                      mov     rax, SYS_WRITE
+   608 00000102 BF01000000                      mov     rdi, STDOUT
+   609 00000107 48BE-                           mov     rsi, crlf
+   610 00000109 [3601000000000000] 
+   611 00000111 BA01000000                      mov     rdx, 1
+   612 00000116 0F05                            syscall
+   613                                  
+   614                                  ; close connection
+   615 00000118 B803000000                      mov     rax, SYS_CLOSE
+   616 0000011D 488B3C25[00000000]              mov     rdi, QWORD[sockfd]
+   617 00000125 0F05                            syscall
+   618                                          
+   619                                  ; disconnected message
+   620 00000127 48BE-                           mov     rsi, disconnected
+   621 00000129 [2401000000000000] 
+   622 00000131 BA12000000                      mov     rdx, disconnected.length
+   623 00000136 BF01000000                      mov     rdi, STDOUT
+   624 0000013B B801000000                      mov     rax, SYS_WRITE
+   625 00000140 0F05                            syscall
+   626                                   
+   627                                  ; exit program        
+   628                                  
+   629 00000142 4831FF                          xor     rdi, rdi
+   630 00000145 B83C000000                      mov     rax, SYS_EXIT
+   631 0000014A 0F05                            syscall
+   632                                   
+   633                                  ; the errors
+   634                                  .connecterror:
+   635 0000014C 48BE-                           mov     rsi, connecterror
+   636 0000014E [0901000000000000] 
+   637 00000156 BA11000000                      mov     rdx, connecterror.length
+   638 0000015B EB11                            jmp     .print
+   639                                   
+   640                                  .socketerror:
+   641 0000015D 48BE-                           mov     rsi, socketerror
+   642 0000015F [FC00000000000000] 
+   643 00000167 BA0D000000                      mov     rdx, socketerror.length
+   644 0000016C EB00                            jmp     .print
+   645                                   
+   646                                  .print:
+   647 0000016E BF01000000                      mov     rdi, STDOUT
+   648 00000173 B801000000                      mov     rax, SYS_WRITE
+   649 00000178 0F05                            syscall
+   650                                  .exit:  
+   651 0000017A 4831FF                          xor     rdi, rdi
+   652 0000017D B83C000000                      mov     rax, SYS_EXIT
+   653 00000182 0F05                            syscall

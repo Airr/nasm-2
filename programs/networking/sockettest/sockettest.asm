@@ -62,14 +62,21 @@ request:                ;db 'POST /taxation_customs/vies/vatResponse.html HTTP/1
                         ;; Address   VAARTSTRAAT 2
                         ;; 3191 BOORTMEERBEEK
                         
-                        db 'GET /check/BE/0823633037 HTTP/1.1',13, 10
-                        db 'Host: localhost', 13, 10
-                        ;db 'User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:35.0) Gecko/20100101 Firefox/35.0', 10, 10
-                        db 'Accept: application/json', 13, 10
-                        db 'Accept-Language: en-US,en;q=0.5', 13, 10
-                        ;db 'Accept-Encoding: gzip, deflate', 13, 10
-                        db 'Connection: close', 13, 10
-                        db 13, 10
+                        ;db 'POST /bin/getpostparams HTTP/1.1', 13, 10
+                        ;db 'User-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)', 13, 10
+                        ;db 'Host: www.tutorialspoint.com', 13, 10
+                        ;db 'Accept-Language: en-us', 13, 10
+                        ;db 'Content-Length: 15', 13, 10
+                        ;db 'Connection: close', 13, 10, 13, 10 ;Keep-Alive', 13, 10, 13, 10
+                        ;db 'a=10&b=20&c=a+b'
+                        db 'PUT /hello.html HTTP/1.1',10
+                        db 'User-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)',10
+                        db 'Host: www.tutorialspoint.com',10
+                        db 'Accept-Language: en-us',10
+                        db 'Connection: Keep-Alive',10
+                        db 'Content-type: text/html',10
+                        db 'Content-Length: 182',10,10
+                        db '<html><body><h1>Hello, World!</h1></body></html>'
                         
 request.length:         equ $-request
 socketerror:            db "socket error", 10
@@ -101,7 +108,7 @@ _start:
  
 ; fill in sock_addr structure (on stack)
         xor     r8, r8                   ; clear the value of r8
-        mov     r8, 0x8C8BB72E;            0x67774393           ; VIES VAT checker IP 147.67.119.103 (ec.europa.eu); 100007F (IP address : 127.0.0.1)
+        mov     r8, 0x0100007F;          ; 8C8BB72E;            0x67774393           ; VIES VAT checker IP 147.67.119.103 (ec.europa.eu); 100007F (IP address : 127.0.0.1)
         push    r8                       ; push r8 to the stack
         push    WORD 0x5000              ; port 80 push our port number to the stack (Port = 4444) don't use PUSH WORD 4444 (endianess!)
         push    WORD AF_INET             ; push protocol argument to the stack (AF_INET = 2)
