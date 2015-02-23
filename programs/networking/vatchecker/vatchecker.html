@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <title>get JSON object</title>
-        <script type="text/javascript" src="/js/jquery-min.js"></script>
+        <script type="text/javascript" src="js/jquery-min.js"></script>
         <script type="text/javascript">
         $(document).ready(function(){
             $(".button").click(function(){
@@ -15,7 +15,7 @@
                   age = $("#inputage").val();
                   var posting = $.post(
                                 // you need to replace localhost with the server where the application is running on
-                                "/bin/parsejsonobject",
+                                "/bin/vatchecker",
                                 {
                                   "name" : name,
                                   "age" : age

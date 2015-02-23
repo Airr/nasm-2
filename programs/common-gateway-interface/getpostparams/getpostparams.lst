@@ -1,290 +1,294 @@
-     1                                  ;***********************************************************************************************
-     2                                  ; Name:         getpostparams
-     3                                  ; Build:        see makefile
-     4                                  ; Description:  Get the post parameters.
-     5                                  ; Use:          This program allow us to see the posted parameters from almost any website.
-     6                                  ; Disadvantage: Posted files contents can corrupt the output on the webbrowser, a work around wil
-     7                                  ;               be made soon and wil show the file contents in hexademal.
-     8                                  ;***********************************************************************************************
-     9                                  
-    10                                  BITS 64
-    11                                  
-   409                                  [list -]
-   410                                  
-   411                                  section .bss
-   412                                  
-   413 00000000 <res 00000008>          oldbrkaddr:    resq  1
-   414 00000008 <res 00000008>          content:       resq  1
-   415                                  
-   416 00000010 <res 00000001>          buffer:        resb  1
-   417                                  buffer.length: equ   $-buffer
-   418                                  
-   419                                  section .data
-   420                                  
+     1                                  ; Name:         getpostparams
+     2                                  ; Build:        see makefile
+     3                                  ; Description:  Get the post parameters.
+     4                                  ; Use:          This program allow us to see the posted parameters from almost any website.
+     5                                  ; Disadvantage: Posted files contents can corrupt the output on the webbrowser, a work around wil
+     6                                  ;               be made soon and wil show the file contents in hexademal.
+     7                                  ; How to test:  in a terminal type export CONTENT_LENGTH=[value for content length]
+     8                                  ;               start the application
+     9                                  ;               once 'parameters stripped from HTTP header: <i><b>' is on screen you can type your
+    10                                  ;               parameter-value pairs like an url string and press enter.
+    11                                  ;               You should see those in the output.
+    12                                  ;               example: export CONTENT_LENGTH=14
+    13                                  ;               as input a=10&b=20&c=30.
+    14                                  
+    15                                  bits 64
+    16                                  
+   333                                  [list -]
+   334                                  
+   335                                  section .bss
+   336                                  
+   337 00000000 <res 00000008>               oldbrkaddr:         resq  1
+   338 00000008 <res 00000008>               contentlength:      resq  1
+   339                                  
+   340 00000010 <res 00000001>               buffer:             resb  1
+   341                                       buffer.length:      equ   $-buffer
+   342                                  
+   343                                  section .data
+   344                                  
+   345                                  top:
+   346 00000000 436F6E74656E742D74-         db 'Content-type: text/html', 0x0A, 0x0A
+   347 00000009 7970653A2074657874-
+   348 00000012 2F68746D6C0A0A     
+   349 00000019 3C21444F4354595045-         db '<!DOCTYPE html><html><head><title>CGI : Get POST parameters</title></head>'
+   350 00000022 2068746D6C3E3C6874-
+   351 0000002B 6D6C3E3C686561643E-
+   352 00000034 3C7469746C653E4347-
+   353 0000003D 49203A204765742050-
+   354 00000046 4F535420706172616D-
+   355 0000004F 65746572733C2F7469-
+   356 00000058 746C653E3C2F686561-
+   357 00000061 643E               
+   358 00000063 3C626F64793E3C7072-         db '<body><pre><h1>Get POST parameters</h1><br /><span>',10
+   359 0000006C 653E3C68313E476574-
+   360 00000075 20504F535420706172-
+   361 0000007E 616D65746572733C2F-
+   362 00000087 68313E3C6272202F3E-
+   363 00000090 3C7370616E3E0A     
+   364                                  requiredVar:    
+   365 00000097 434F4E54454E545F4C-         db 'CONTENT_LENGTH'
+   366 000000A0 454E475448         
+   367                                  requiredVar.length: equ $-requiredVar    
+   368 000000A5 3A203C693E3C623E            db ': <i><b>'
+   369                                  top.length: equ $-top
+   370                                  
+   371                                  nrparams:
+   372 000000AD 3C2F623E3C2F693E20-         db '</b></i> bytes.</span><br /><span>parameters stripped from HTTP header: <i><b>'
+   373 000000B6 62797465732E3C2F73-
+   374 000000BF 70616E3E3C6272202F-
+   375 000000C8 3E3C7370616E3E7061-
+   376 000000D1 72616D657465727320-
+   377 000000DA 737472697070656420-
+   378 000000E3 66726F6D2048545450-
+   379 000000EC 206865616465723A20-
+   380 000000F5 3C693E3C623E       
+   381                                  nrparams.length: equ $-nrparams
+   382                                  
+   383                                  table:
+   384 000000FB 3C2F623E3C2F693E3C-         db '</b></i><br /><br />'
+   385 00000104 6272202F3E3C627220-
+   386 0000010D 2F3E               
+   387 0000010F 3C7461626C6520616C-         db '<table align="left" width="25',0x25,'" border="0" cellpadding="0" cellspacing="0" class="params">'
+   388 00000118 69676E3D226C656674-
+   389 00000121 222077696474683D22-
+   390 0000012A 3235252220626F7264-
+   391 00000133 65723D223022206365-
+   392 0000013C 6C6C70616464696E67-
+   393 00000145 3D2230222063656C6C-
+   394 0000014E 73706163696E673D22-
+   395 00000157 302220636C6173733D-
+   396 00000160 22706172616D73223E 
+   397 00000169 3C74723E3C74643E3C-         db '<tr><td><b><u>name</u></b></td><td><b><u>value</u></b></td></tr><tr><td class="name">'
+   398 00000172 623E3C753E6E616D65-
+   399 0000017B 3C2F753E3C2F623E3C-
+   400 00000184 2F74643E3C74643E3C-
+   401 0000018D 623E3C753E76616C75-
+   402 00000196 653C2F753E3C2F623E-
+   403 0000019F 3C2F74643E3C2F7472-
+   404 000001A8 3E3C74723E3C746420-
+   405 000001B1 636C6173733D226E61-
+   406 000001BA 6D65223E           
+   407                                  table.length: equ $-table
+   408                                  
+   409                                  newcolumn:
+   410 000001BE 3C2F74643E3C746420-         db '</td><td class="value">'
+   411 000001C7 636C6173733D227661-
+   412 000001D0 6C7565223E         
+   413                                  newcolumn.length: equ $-newcolumn
+   414                                  
+   415                                  middle:    
+   416 000001D5 3C2F74643E3C2F7472-         db '</td></tr><tr><td class="name">'
+   417 000001DE 3E3C74723E3C746420-
+   418 000001E7 636C6173733D226E61-
+   419 000001F0 6D65223E           
+   420                                  middle.length: equ $-middle
    421                                  
-   422                                  top:
-   423 00000000 436F6E74656E742D74-         db 'Content-type: text/html', 0x0A, 0x0A
-   424 00000009 7970653A2074657874-
-   425 00000012 2F68746D6C0A0A     
-   426 00000019 3C21444F4354595045-         db '<!DOCTYPE html><html><head><title>CGI : Get POST parameters</title></head>'
-   427 00000022 2068746D6C3E3C6874-
-   428 0000002B 6D6C3E3C686561643E-
-   429 00000034 3C7469746C653E4347-
-   430 0000003D 49203A204765742050-
-   431 00000046 4F535420706172616D-
-   432 0000004F 65746572733C2F7469-
-   433 00000058 746C653E3C2F686561-
-   434 00000061 643E               
-   435 00000063 3C626F64793E3C7072-         db '<body><pre><h1>Get POST parameters</h1><br /><span>'
-   436 0000006C 653E3C68313E476574-
-   437 00000075 20504F535420706172-
-   438 0000007E 616D65746572733C2F-
-   439 00000087 68313E3C6272202F3E-
-   440 00000090 3C7370616E3E       
-   441                                  requiredVar:    
-   442 00000096 434F4E54454E545F4C-         db 'CONTENT_LENGTH'
-   443 0000009F 454E475448         
-   444                                  requiredVar.length: equ $-requiredVar    
-   445 000000A4 3A203C693E3C623E            db ': <i><b>'
-   446                                  top.length: equ $-top
-   447                                  
-   448                                  nrparams:
-   449 000000AC 3C2F623E3C2F693E20-         db '</b></i> bytes.</span><br /><span>parameters stripped from HTTP header: <i><b>'
-   450 000000B5 62797465732E3C2F73-
-   451 000000BE 70616E3E3C6272202F-
-   452 000000C7 3E3C7370616E3E7061-
-   453 000000D0 72616D657465727320-
-   454 000000D9 737472697070656420-
-   455 000000E2 66726F6D2048545450-
-   456 000000EB 206865616465723A20-
-   457 000000F4 3C693E3C623E       
-   458                                  nrparams.length: equ $-nrparams
-   459                                  
-   460                                  table:
-   461 000000FA 3C2F623E3C2F693E3C-         db '</b></i><br /><br />'
-   462 00000103 6272202F3E3C627220-
-   463 0000010C 2F3E               
-   464 0000010E 3C7461626C6520616C-         db '<table align="left" width="25',0x25,'" border="0" cellpadding="0" cellspacing="0" class="params">'
-   465 00000117 69676E3D226C656674-
-   466 00000120 222077696474683D22-
-   467 00000129 3235252220626F7264-
-   468 00000132 65723D223022206365-
-   469 0000013B 6C6C70616464696E67-
-   470 00000144 3D2230222063656C6C-
-   471 0000014D 73706163696E673D22-
-   472 00000156 302220636C6173733D-
-   473 0000015F 22706172616D73223E 
-   474 00000168 3C74723E3C74643E3C-         db '<tr><td><b><u>name</u></b></td><td><b><u>value</u></b></td></tr><tr><td class="name">'
-   475 00000171 623E3C753E6E616D65-
-   476 0000017A 3C2F753E3C2F623E3C-
-   477 00000183 2F74643E3C74643E3C-
-   478 0000018C 623E3C753E76616C75-
-   479 00000195 653C2F753E3C2F623E-
-   480 0000019E 3C2F74643E3C2F7472-
-   481 000001A7 3E3C74723E3C746420-
-   482 000001B0 636C6173733D226E61-
-   483 000001B9 6D65223E           
-   484                                  table.length: equ $-table
-   485                                  
-   486                                  newcolumn:
-   487 000001BD 3C2F74643E3C746420-         db '</td><td class="value">'
-   488 000001C6 636C6173733D227661-
-   489 000001CF 6C7565223E         
-   490                                  newcolumn.length: equ $-newcolumn
-   491                                  
-   492                                  middle:    
-   493 000001D4 3C2F74643E3C2F7472-         db '</td></tr><tr><td class="name">'
-   494 000001DD 3E3C74723E3C746420-
-   495 000001E6 636C6173733D226E61-
-   496 000001EF 6D65223E           
-   497                                  middle.length: equ $-middle
-   498                                  
-   499                                  bottom:
-   500 000001F3 3C2F74643E3C2F7472-         db '</td></tr></table></pre></body></html>'
-   501 000001FC 3E3C2F7461626C653E-
-   502 00000205 3C2F7072653E3C2F62-
-   503 0000020E 6F64793E3C2F68746D-
-   504 00000217 6C3E               
-   505                                  bottom.length: equ $-bottom
-   506                                  
-   507                                  htmlbr:
-   508 00000219 3C6272202F3E                db '<br />'
-   509                                  htmlbr.length: equ $-htmlbr    
-   510                                  
-   511                                  section .text
-   512                                          global _start
-   513                                  
-   514                                  _start:
-   515                                      ; write the first part of the webpage
-   516 00000000 48BE-                       mov         rsi, top
-   517 00000002 [0000000000000000] 
-   518 0000000A BAAC000000                  mov         rdx, top.length
-   519 0000000F BF01000000                  mov         rdi, STDOUT
-   520 00000014 B801000000                  mov         rax, SYS_WRITE
-   521 00000019 0F05                        syscall
-   522                                      
-   523                                      ; adjust the stack to point to the web servers variables
-   524 0000001B 58                          pop         rax
-   525 0000001C 58                          pop         rax
-   526 0000001D 58                          pop         rax
-   527 0000001E FC                          cld
-   528                                      ; let's loop through the webserver variables
-   529                                  .getvariable:
-   530 0000001F 5E                          pop         rsi
-   531 00000020 4809F6                      or          rsi, rsi                ; done yet?
-   532 00000023 0F8454010000                jz          .done
-   533                                      
-   534                                      ; RSI contains a pointer to CONTENT_LENGTH the variable we are searching for
-   535                                      ; look for the required variable name amongst them
-   536 00000029 B90E000000                  mov         rcx, requiredVar.length
-   537 0000002E 48BF-                       mov         rdi, requiredVar
-   538 00000030 [9600000000000000] 
-   539 00000038 F2AE                        repne       scasb                   ; scan RCX bytes
-   540 0000003A 75E3                        jne         .getvariable            ; no match get the next variable, if any
-   541                                      
-   542                                      ; we found the variable, parse the length of the post parameters
-   543                                      ; RSI points to the = sign, increment RSI to point to the character after '='
-   544 0000003C 48FFC6                      inc         rsi
-   545                                      
-   546                                      ; initialise rcx, rcx wil contain the hexadecimal value of CONTENT_LENGTH
-   547 0000003F 4831C9                      xor         rcx, rcx
-   548                                  .nextparamstringchar:
-   549 00000042 4831C0                      xor         rax, rax
-   550 00000045 AC                          lodsb                               ; get digit
-   551 00000046 3C00                        cmp         al, 0                   ; if 0 then no digits
-   552 00000048 7439                        je          .endofparamstring
-   553                                      
-   554 0000004A 4831D2                      xor         rdx, rdx
-   555 0000004D BB0A000000                  mov         rbx, 10
-   556 00000052 480FAFCB                    imul        rcx, rbx
-   557 00000056 880425[10000000]            mov         BYTE[buffer], al
-   558 0000005D 240F                        and         al, 0x0F
-   559 0000005F 4801C1                      add         rcx, rax                ; previous digit x 10 + current digit
-   560                                      
-   561 00000062 56                          push        rsi
-   562 00000063 48BE-                       mov         rsi, buffer
-   563 00000065 [1000000000000000] 
-   564 0000006D BA01000000                  mov         rdx, buffer.length
-   565 00000072 BF01000000                  mov         rdi, STDOUT
-   566 00000077 51                          push	rcx
-   567 00000078 B801000000                  mov         rax, SYS_WRITE
-   568 0000007D 0F05                        syscall
-   569 0000007F 59                          pop		rcx
-   570 00000080 5E                          pop         rsi
-   571                                      
-   572 00000081 EBBF                        jmp         .nextparamstringchar
-   573                                  .endofparamstring:
-   574                                  
-   575 00000083 48FFC1                      inc 	rcx
-   576 00000086 48890C25[08000000]          mov		QWORD[content], rcx
-   577                                  
-   578                                      ; end the number of parameters in HTML
-   579                                  
-   580 0000008E 48BE-                       mov         rsi, nrparams
-   581 00000090 [AC00000000000000] 
-   582 00000098 BA4E000000                  mov         rdx, nrparams.length
-   583 0000009D BF01000000                  mov         rdi, STDOUT
-   584 000000A2 B801000000                  mov         rax, SYS_WRITE
-   585 000000A7 0F05                        syscall
-   586                                      
-   587                                      ; RCX contains the content_length in hexadecimal
-   588                                      ; reserve space on, the heap to store the parameters from STDIN
-   589                                  
-   590 000000A9 BF00000000                  mov         rdi, 0
-   591 000000AE B80C000000                  mov         rax, SYS_BRK
-   592 000000B3 0F05                        syscall
-   593                                      
-   594 000000B5 48890425[00000000]          mov         QWORD[oldbrkaddr], rax  ; save the address to de-allocate memory
-   595                                  
-   596                                      ; reserve memory for the parameters
-   597 000000BD 48030425[08000000]          add         rax, QWORD[content]
-   598                                      
-   599 000000C5 4889C7                      mov         rdi, rax
-   600 000000C8 B80C000000                  mov         rax, SYS_BRK
-   601 000000CD 0F05                        syscall
-   602                                      
-   603 000000CF 4883F800                    cmp         rax, 0
-   604 000000D3 0F84A4000000                je          .done                   ; if RAX = 0 then no memory is available, now we exit
-   605                                  
-   606                                      ; read the params in our created buffer                                
-   607                                      
-   608 000000D9 488B3425[00000000]          mov         rsi, QWORD[oldbrkaddr]
-   609 000000E1 488B1425[08000000]          mov         rdx, QWORD[content]                ; length of the parameterstring
-   610 000000E9 BF00000000                  mov         rdi, STDIN
-   611 000000EE B800000000                  mov         rax, SYS_READ
-   612 000000F3 0F05                        syscall
-   613                                      
-   614                                      ; print the entire parameterstring
-   615                                      ; rsi and rdx already contains the string to print and the string length
-   616 000000F5 BF01000000                  mov         rdi, STDOUT
-   617 000000FA B801000000                  mov         rax, SYS_WRITE
-   618 000000FF 0F05                        syscall
-   619                                     
-   620 00000101 48BE-                       mov         rsi, table
-   621 00000103 [FA00000000000000] 
-   622 0000010B BAC3000000                  mov         rdx, table.length
-   623 00000110 BF01000000                  mov         rdi, STDOUT
-   624 00000115 B801000000                  mov         rax, SYS_WRITE
-   625 0000011A 0F05                        syscall
-   626                                      
-   627 0000011C 90                          nop
-   628                                      ; parse the parameter string
-   629 0000011D 488B3425[00000000]          mov         rsi, QWORD[oldbrkaddr]
-   630                                  .nextbyte:
-   631 00000125 4831C0                      xor         rax, rax
-   632 00000128 AC                          lodsb                               ; read byte
-   633                                      
-   634 00000129 56                          push        rsi                     ; save pointer
-   635 0000012A 3C00                        cmp         al, 0
-   636 0000012C 744F                        je          .done                   ; if zero -> end of string
-   637 0000012E 3C3D                        cmp         al, '='
-   638 00000130 741C                        je          .newcolumn              ; if '=' -> next byte is parametervalue
-   639 00000132 3C26                        cmp         al, '&'
-   640 00000134 7429                        je          .newrow                 ; if '&' -> next byte is parametername
-   641 00000136 880425[10000000]            mov         BYTE[buffer], al        ; otherwise print the byte
-   642                                  
-   643                                      ; write the character in the buffer
-   644 0000013D 48BE-                       mov         rsi, buffer
-   645 0000013F [1000000000000000] 
-   646 00000147 BA01000000                  mov         rdx, buffer.length
-   647 0000014C EB20                        jmp         .writechar
-   648                                      
-   649                                      ; end previous column and start new one
-   650                                  .newcolumn:
-   651 0000014E 48BE-                       mov         rsi, newcolumn
-   652 00000150 [BD01000000000000] 
-   653 00000158 BA17000000                  mov         rdx, newcolumn.length
-   654 0000015D EB0F                        jmp         .writechar
-   655                                      
-   656                                      ; end previous row and start new one
-   657                                  .newrow:
-   658 0000015F 48BE-                       mov         rsi, middle
-   659 00000161 [D401000000000000] 
-   660 00000169 BA1F000000                  mov         rdx, middle.length
-   661                                      
-   662                                      ; write to STDOUT
-   663                                  .writechar:    
-   664 0000016E BF01000000                  mov         rdi, STDOUT
-   665 00000173 B801000000                  mov         rax, SYS_WRITE
-   666 00000178 0F05                        syscall
-   667 0000017A 5E                          pop         rsi
-   668 0000017B EBA8                        jmp         .nextbyte
-   669                                  
-   670                                  .done:
-   671                                      ; free the allocated memory
-   672 0000017D 488B3C25[00000000]          mov         rdi, QWORD[oldbrkaddr]
-   673 00000185 B80C000000                  mov         rax, SYS_BRK
-   674 0000018A 0F05                        syscall
-   675                                  
-   676                                      ; we are at the end of our search, print the rest of the HTML form
-   677                                      
-   678 0000018C 48BE-                       mov         rsi, bottom
-   679 0000018E [F301000000000000] 
-   680 00000196 BA26000000                  mov         rdx, bottom.length
-   681 0000019B BF01000000                  mov         rdi, STDOUT
-   682 000001A0 B801000000                  mov         rax, SYS_WRITE
-   683 000001A5 0F05                        syscall
-   684                                      
-   685 000001A7 4831FF                      xor         rdi, rdi
-   686 000001AA B83C000000                  mov         rax, SYS_EXIT
-   687 000001AF 0F05                        syscall
+   422                                  bottom:
+   423 000001F4 3C2F74643E3C2F7472-         db '</td></tr></table></pre></body></html>'
+   424 000001FD 3E3C2F7461626C653E-
+   425 00000206 3C2F7072653E3C2F62-
+   426 0000020F 6F64793E3C2F68746D-
+   427 00000218 6C3E               
+   428                                  bottom.length: equ $-bottom
+   429                                  
+   430                                  htmlbr:
+   431 0000021A 3C6272202F3E                db '<br />'
+   432                                  htmlbr.length: equ $-htmlbr    
+   433                                  
+   434                                  section .text
+   435                                       global _start
+   436                                  
+   437                                  _start:
+   438                                       ; write the first part of the webpage
+   439 00000000 48BE-                        mov         rsi, top
+   440 00000002 [0000000000000000] 
+   441 0000000A BAAD000000                   mov         rdx, top.length
+   442 0000000F BF01000000                   mov         rdi, STDOUT
+   443 00000014 B801000000                   mov         rax, SYS_WRITE
+   444 00000019 0F05                         syscall
+   445                                       
+   446                                       ; adjust the stack to point to the web servers variables
+   447 0000001B 58                           pop         rax
+   448 0000001C 58                           pop         rax
+   449 0000001D 58                           pop         rax
+   450 0000001E FC                           cld
+   451                                       ; let's loop through the webserver variables
+   452                                  .getvariable:
+   453 0000001F 5E                           pop         rsi
+   454 00000020 4809F6                       or          rsi, rsi                ; done yet?
+   455 00000023 0F8453010000                 jz          .done
+   456                                       
+   457                                       ; RSI contains a pointer to CONTENT_LENGTH the variable we are searching for
+   458                                       ; look for the required variable name amongst them
+   459 00000029 B90E000000                   mov         rcx, requiredVar.length
+   460 0000002E 48BF-                        mov         rdi, requiredVar
+   461 00000030 [9700000000000000] 
+   462 00000038 F3A6                         rep         cmpsb                   ; compare RCX bytes
+   463 0000003A 75E3                         jne         .getvariable            ; no match get the next variable, if any
+   464                                       
+   465                                       ; we found the variable, parse the length of the post parameters
+   466                                       ; RSI points to the = sign, increment RSI to point to the character after '='
+   467 0000003C 48FFC6                       inc         rsi
+   468                                       
+   469                                       ; initialise rcx, rcx wil contain the hexadecimal value of CONTENT_LENGTH
+   470 0000003F 4831C9                       xor       rcx, rcx
+   471                                  .nextparamstringchar:
+   472 00000042 4831C0                       xor       rax, rax
+   473 00000045 AC                           lodsb                               ; get digit
+   474 00000046 3C00                         cmp       al, 0                   ; if 0 then no digits
+   475 00000048 7439                         je        .endofparamstring
+   476                                       
+   477 0000004A 4831D2                       xor       rdx, rdx
+   478 0000004D BB0A000000                   mov       rbx, 10
+   479 00000052 480FAFCB                     imul      rcx, rbx
+   480 00000056 880425[10000000]             mov       BYTE[buffer], al
+   481 0000005D 240F                         and       al, 0x0F
+   482 0000005F 4801C1                       add       rcx, rax                ; previous digit x 10 + current digit
+   483                                       
+   484 00000062 56                           push      rsi
+   485 00000063 48BE-                        mov       rsi, buffer
+   486 00000065 [1000000000000000] 
+   487 0000006D BA01000000                   mov       rdx, buffer.length
+   488 00000072 BF01000000                   mov       rdi, STDOUT
+   489 00000077 51                           push	     rcx
+   490 00000078 B801000000                   mov       rax, SYS_WRITE
+   491 0000007D 0F05                         syscall
+   492 0000007F 59                           pop       rcx
+   493 00000080 5E                           pop       rsi
+   494                                       
+   495 00000081 EBBF                         jmp       .nextparamstringchar
+   496                                  .endofparamstring:
+   497                                  
+   498 00000083 48FFC1                       inc 	     rcx
+   499 00000086 48890C25[08000000]           mov		QWORD[contentlength], rcx
+   500                                  
+   501                                       ; end the number of parameters in HTML
+   502                                  
+   503 0000008E 48BE-                        mov       rsi, nrparams
+   504 00000090 [AD00000000000000] 
+   505 00000098 BA4E000000                   mov       rdx, nrparams.length
+   506 0000009D BF01000000                   mov       rdi, STDOUT
+   507 000000A2 B801000000                   mov       rax, SYS_WRITE
+   508 000000A7 0F05                         syscall
+   509                                       
+   510                                       ; RCX contains the content_length in hexadecimal
+   511                                       ; reserve space on, the heap to store the parameters from STDIN
+   512                                  
+   513 000000A9 BF00000000                   mov       rdi, 0
+   514 000000AE B80C000000                   mov       rax, SYS_BRK
+   515 000000B3 0F05                         syscall
+   516                                       
+   517 000000B5 48890425[00000000]           mov       QWORD[oldbrkaddr], rax  ; save the address to de-allocate memory
+   518                                  
+   519                                       ; reserve memory for the parameters
+   520 000000BD 48030425[08000000]           add       rax, QWORD[contentlength]
+   521                                       
+   522 000000C5 4889C7                       mov       rdi, rax
+   523 000000C8 B80C000000                   mov       rax, SYS_BRK
+   524 000000CD 0F05                         syscall
+   525                                       
+   526 000000CF 4821C0                       and       rax, rax
+   527 000000D2 0F84A4000000                 jz        .done                   ; if RAX = 0 then no memory is available, now we exit
+   528                                  
+   529                                       ; read the params in our created buffer                                
+   530                                       
+   531 000000D8 488B3425[00000000]           mov       rsi, QWORD[oldbrkaddr]
+   532 000000E0 488B1425[08000000]           mov       rdx, QWORD[contentlength]                ; length of the parameterstring
+   533 000000E8 BF00000000                   mov       rdi, STDIN
+   534 000000ED B800000000                   mov       rax, SYS_READ
+   535 000000F2 0F05                         syscall
+   536                                       
+   537                                       ; print the entire parameterstring
+   538                                       ; rsi and rdx already contains the string to print and the string length
+   539 000000F4 BF01000000                   mov       rdi, STDOUT
+   540 000000F9 B801000000                   mov       rax, SYS_WRITE
+   541 000000FE 0F05                         syscall
+   542                                       
+   543 00000100 48BE-                        mov       rsi, table
+   544 00000102 [FB00000000000000] 
+   545 0000010A BAC3000000                   mov       rdx, table.length
+   546 0000010F BF01000000                   mov       rdi, STDOUT
+   547 00000114 B801000000                   mov       rax, SYS_WRITE
+   548 00000119 0F05                         syscall
+   549                                       
+   550 0000011B 90                           nop
+   551                                       ; parse the parameter string
+   552 0000011C 488B3425[00000000]           mov       rsi, QWORD[oldbrkaddr]
+   553                                  .nextbyte:
+   554 00000124 4831C0                       xor       rax, rax
+   555 00000127 AC                           lodsb                               ; read byte
+   556                                       
+   557 00000128 56                           push      rsi                     ; save pointer
+   558 00000129 3C00                         cmp       al, 0
+   559 0000012B 744F                         je        .done                   ; if zero -> end of string
+   560 0000012D 3C3D                         cmp       al, '='
+   561 0000012F 741C                         je        .newcolumn              ; if '=' -> next byte is parametervalue
+   562 00000131 3C26                         cmp       al, '&'
+   563 00000133 7429                         je        .newrow                 ; if '&' -> next byte is parametername
+   564 00000135 880425[10000000]             mov       BYTE[buffer], al        ; otherwise print the byte
+   565                                  
+   566                                       ; write the character in the buffer
+   567 0000013C 48BE-                        mov       rsi, buffer
+   568 0000013E [1000000000000000] 
+   569 00000146 BA01000000                   mov       rdx, buffer.length
+   570 0000014B EB20                         jmp       .writechar
+   571                                       
+   572                                       ; end previous column and start new one
+   573                                  .newcolumn:
+   574 0000014D 48BE-                        mov       rsi, newcolumn
+   575 0000014F [BE01000000000000] 
+   576 00000157 BA17000000                   mov       rdx, newcolumn.length
+   577 0000015C EB0F                         jmp       .writechar
+   578                                       
+   579                                       ; end previous row and start new one
+   580                                  .newrow:
+   581 0000015E 48BE-                        mov       rsi, middle
+   582 00000160 [D501000000000000] 
+   583 00000168 BA1F000000                   mov       rdx, middle.length
+   584                                       
+   585                                       ; write to STDOUT
+   586                                  .writechar:    
+   587 0000016D BF01000000                   mov       rdi, STDOUT
+   588 00000172 B801000000                   mov       rax, SYS_WRITE
+   589 00000177 0F05                         syscall
+   590 00000179 5E                           pop       rsi
+   591 0000017A EBA8                         jmp       .nextbyte
+   592                                  
+   593                                  .done:
+   594                                       ; free the allocated memory
+   595 0000017C 488B3C25[00000000]           mov       rdi, QWORD[oldbrkaddr]
+   596 00000184 B80C000000                   mov       rax, SYS_BRK
+   597 00000189 0F05                         syscall
+   598                                  
+   599                                       ; we are at the end of our search, print the rest of the HTML form
+   600                                       
+   601 0000018B 48BE-                        mov       rsi, bottom
+   602 0000018D [F401000000000000] 
+   603 00000195 BA26000000                   mov       rdx, bottom.length
+   604 0000019A BF01000000                   mov       rdi, STDOUT
+   605 0000019F B801000000                   mov       rax, SYS_WRITE
+   606 000001A4 0F05                         syscall
+   607                                       
+   608 000001A6 4831FF                       xor       rdi, rdi
+   609 000001A9 B83C000000                   mov       rax, SYS_EXIT
+   610 000001AE 0F05                         syscall

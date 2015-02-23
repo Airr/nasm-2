@@ -7,7 +7,9 @@
 
 bits 64
 
-%include "unistd.inc"
+[list -]
+     %include "unistd.inc"
+[list +]
 
 section .data
 

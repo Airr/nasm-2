@@ -8,11 +8,15 @@
 ;   EL Greece,    HU Hungary,    IE Ireland,    IT Italy,    LV Latvia,            LT Lithuania,  LU Luxembourg,    MT Malta,    NL Netherlands,    PL Poland
 ;   PT Portugal,  RO Romania,    SK Slovakia,    SI Slovenia,    ES Spain,    SE Sweden,    GB United Kingdom
 ;
-; errors:
+; replies:
+; if error:
+;
 ; {  "error": { "code": "vies-unavailable", "text": "VIES Webservice currently unavailable."}}
 ;                       "member-state-unavailable"
 ;                       "invalid-input"
-; response:
+;
+; if response/ not all fields will be available depending the VAT server from the specified country replies with address and name.
+;
 ;{
 ;  "response": {
 ;    "country_code": "BE",
@@ -24,6 +28,7 @@
 ;    "request_identifier": "WAPIAAAAUumRndwM"
 ;  }
 ;}
+;
 
 BITS 64
 [list -]
@@ -32,37 +37,46 @@ BITS 64
 [list +]
 
 section .bss
- 
+
+    
+      
      sockfd:             resq    1
      sock_addr:          resq    1
-                                                                 ; most replies from http://vatid.eu aren't more than 200 bytes
+                                   
      memorymap:          resq    1
      bytesreceived:      resq    1
      buffer:             resb    100
      .length:            equ     $-buffer
-
+    
+    oldbrkaddr:         resq    1
+    charbuffer:         resb    1
+    content:        resq 1
+    
      pfds:                                             ; pipe file descriptors
      .stdin:                  resd    1
      .stdout:                 resd    1
 
 section .data
-    
+    requestmethod:      db      "REQUEST_METHOD=POST"
+      .length:          equ     $-requestmethod
+    contentlength:      db      "CONTENT_LENGTH="
+      .length:          equ     $-contentlength
+      
      ipaddress:          db   46,183,139,140                     ; ip address vatid.eu
      
      request:            db 'GET /check/'
-     .countrycode:       db 'BE'
+     .countrycode:      ; db 'BE'
                          db '/'
-     .vatnumber:         db '0823633037'
+     .vatnumber:         ;db '0823633037'
                          db '/'
-                         db 'BE'
+                         ;db 'BE'
                          db '/'
-                         db '0823633037'
+                         ;db '0823633037'
                          db ' HTTP/1.1', 10
                          db 'Host: localhost', 10
                          db 'Accept: application/json', 10
                          db 'Accept-Language: en-US,en;q=0.5', 10
-                         db 'Connection: close', 10
-                         db 10
+                         db 'Connection: close', 10, 10
                         
      request.length:     equ $-request
      socketerror:        db "socket error", 10
@@ -73,12 +87,90 @@ section .data
      .length:            equ  $-pipeerror
 
      crlf:               db 10
+     reply:              db 'Content-type: text/html', 0x0A, 0x0A
+     .length:            equ $-reply
+     
  
 section .text
     global _start
 
 _start:
+
+; first check if the form was posted
+    ; adjust stack to environment parameters
+    pop         rax
+    pop         rax
+    pop         rax
+    ; we are at the (list-1) of environment (web) variables
+    mov         rbp, rsp                 ; save begin of list in r8
     
+    ; let's loop through the webserver variables, searching for REQUEST_METHOD=POST
+    cld
+.getrequestmethod:
+    pop         rsi
+    or          rsi, rsi                ; done yet?
+    jz          .exit                   ; we didn't find the REQUEST_METHOD=POST string   
+    ; RDI contains a pointer to CONTENT_LENGTH=POST the variable we are searching for
+    ; look for the required variable name amongst them
+    mov         rcx, requestmethod.length
+    mov         rdi, requestmethod
+    rep         cmpsb                   ; compare RCX bytes
+    jne         .getrequestmethod       ; no match get the next variable, if any
+    
+    ; we got a match, now read the CONTENT_LENGTH
+    ; restore top of (list-1)
+    mov         rsp, rbp
+    cld                                 ; just in case
+.getcontentlength:
+    pop         rsi
+    or          rsi, rsi                ; done yet
+    jz          .exit                   ; this shouldn't occur
+    ; RDI contains a pointer to CONTENT_LENGTH= the variable we are searching for
+    mov         rcx, contentlength.length
+    mov         rdi, contentlength
+    rep         cmpsb                   ; compare RCX bytes
+    jne         .getcontentlength       ; no match get the next variable, if any
+    
+    ; we got the CONTENT_LENGTH=, RSI points to the first character of the ASCII digit of the length
+    ; initialise rcx
+    xor         rcx, rcx
+.nextparamstringchar:
+    xor         rax, rax
+    lodsb                               ; get digit
+    and         al, al                   ; if 0 then no digits
+    je          .endofparamstring
+    
+    xor         rdx, rdx
+    mov         rbx, 10
+    imul        rcx, rbx
+    and         al, 0x0F
+    add         rcx, rax                ; previous digit x 10 + current digit    
+    jmp         .nextparamstringchar
+.endofparamstring:   
+    ; RCX contains the content_length in hexadecimal
+    ; reserve space on, the heap to store the parameters from STDIN
+        
+    ; reserve memory for the parameters
+    add         rax, QWORD[content]            ; add contentlength to the program break
+    add         rax, 3                         ; add 3 more for "///"
+    mov         rdi, rax
+    mov         rax, SYS_BRK
+    syscall
+    cmp         rax, 0
+    je          .exit                          ; if RAX = 0 then no memory is available, now we exit
+
+    ; read the params in our created buffer
+    mov         rsi, QWORD[oldbrkaddr]
+    mov         rdx, QWORD[content]
+    mov         rdi, STDOUT
+    mov         rax, SYS_WRITE
+    syscall
+    
+    ; write to stdout to check
+    
+
+    
+        
     ; create pipe, pdfs is an array to the READ and WRITE ends of the pipe
     mov         rdi, pfds                                       ; create pipe
     mov         rax, SYS_PIPE
@@ -185,16 +277,25 @@ _start:
 
     and         r12, r12
     jnz         .getnextbytes
-    
-    ; write memorymap to STDOUT
-    mov         rsi, qword[memorymap]
-    mov         rdx, qword[bytesreceived]
+        
+; send the reply
+    mov         rsi, reply
+    mov         rdx, reply.length
     mov         edi, STDOUT
     mov         rax, SYS_WRITE
     syscall
-    
-; extract the data
-; 
+
+   ;int 3
+
+    ; write memorymap to STDOUT
+    mov         rsi, qword[memorymap]
+    mov         rdx, qword[bytesreceived]
+    add         rsi, 183
+    sub         rdx, 183
+    mov         edi, STDOUT
+    mov         rax, SYS_WRITE
+    syscall
+ 
     
 .endread:    
     ; unmap memory
