@@ -1,4 +1,4 @@
-NAME=datadownload
+NAME=downloaddata
 AS=nasm
 LD=ld
 O           = .o

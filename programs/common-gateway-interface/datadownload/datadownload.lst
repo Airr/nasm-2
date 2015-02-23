@@ -3,66 +3,62 @@
      3                                  ; Description:
      4                                  ; Demonstration of a simple downloadable file, the contents of the file are in the program.
      5                                  ; (It could be the binary of this program too.)
-     6                                  ; A warning is in place. On localhost this program behaves sometimes bad, when post method was used. My Apache webserver often resets the connection.
-     7                                  
-     8                                  bits 64
-     9                                  
-    10                                  section .bss
+     6                                  ; If you should see errors instead of a download window check if fastcgi is enabled on your apache server.
+     7                                  ; appearantle mod-cgi alone isn't enough to serve this program
+     8                                  ; sudo apt-get install libapache2-mod-fastcgi
+     9                                  ; sudo a2enmod fastcgi
+    10                                  ; sudo service apache2 restart
     11                                  
-    12                                  section .data
+    12                                  bits 64
     13                                  
-    14                                  reply:
-    15 00000000 436F6E74656E742D44-          db    'Content-Description: File Transfer', 10                                                       ; FOR I.E.
-    16 00000009 65736372697074696F-
-    17 00000012 6E3A2046696C652054-
-    18 0000001B 72616E736665720A   
-    19 00000023 436F6E74656E742D74-          db    'Content-type: application/octet-stream',10
-    20 0000002C 7970653A206170706C-
-    21 00000035 69636174696F6E2F6F-
-    22 0000003E 637465742D73747265-
-    23 00000047 616D0A             
-    24 0000004A 436F6E74656E742D44-          db    'Content-Disposition: attachment',59,'filename="data.bin"',10                    ; 59 is ascii code for ';'
-    25 00000053 6973706F736974696F-
-    26 0000005C 6E3A20617474616368-
-    27 00000065 6D656E743B66696C65-
-    28 0000006E 6E616D653D22646174-
-    29 00000077 612E62696E220A     
-    30 0000007E 436F6E74656E742D54-          db    'Content-Transfer-Encoding: binary', 10
-    31 00000087 72616E736665722D45-
-    32 00000090 6E636F64696E673A20-
-    33 00000099 62696E6172790A     
-    34 000000A0 457870697265733A20-          db    'Expires: 0', 10
-    35 000000A9 300A               
-    36 000000AB 43616368652D436F6E-          db    'Cache-Control: must-revalidate', 10
-    37 000000B4 74726F6C3A206D7573-
-    38 000000BD 742D726576616C6964-
-    39 000000C6 6174650A           
-    40 000000CA 507261676D613A2070-          db    'Pragma: public', 10
-    41 000000D3 75626C69630A       
-    42 000000D9 436F6E74656E742D4C-          db    'Content-Length: '
-    43 000000E2 656E6774683A20     
-    44 000000E9 280A0A                       db    data.length, 10, 10
-    45                                  data:     
-    46 000000EC 546869732064617461-          db    'This data will be send to the web client'
-    47 000000F5 2077696C6C20626520-
-    48 000000FE 73656E6420746F2074-
-    49 00000107 68652077656220636C-
-    50 00000110 69656E74           
-    51                                  data.length:  equ $-data
-    52                                  reply.length: equ $-reply     
-    53                                  
-    54                                  section .text
-    55                                      global _start
-    56                                      
-    57                                  _start:
-    58                                  
-    59 00000000 B801000000                  mov rax, 1                          ; SYS_WRITE
-    60 00000005 48BE-                       mov rsi, reply
-    61 00000007 [0000000000000000] 
-    62 0000000F BA14010000                  mov rdx, reply.length
-    63 00000014 BF01000000                  mov rdi, 1                          ; STDOUT
-    64 00000019 0F05                        syscall
-    65                                      
-    66 0000001B BF00000000                  mov rdi, 0                          ; no errors
-    67 00000020 B83C000000                  mov rax, 60                         ; SYS_EXIT
-    68 00000025 0F05                        syscall
+   330                                  [list -]
+   331                                  
+   332                                  section .bss
+   333                                  
+   334                                  section .data
+   335                                  
+   336                                  reply:
+   337 00000000 436F6E74656E742D74-          db   'Content-type: application/octet-stream', 10
+   338 00000009 7970653A206170706C-
+   339 00000012 69636174696F6E2F6F-
+   340 0000001B 637465742D73747265-
+   341 00000024 616D0A             
+   342 00000027 436F6E74656E742D44-          db   'Content-Disposition: attachment; filename="data.bin"', 10, 10
+   343 00000030 6973706F736974696F-
+   344 00000039 6E3A20617474616368-
+   345 00000042 6D656E743B2066696C-
+   346 0000004B 656E616D653D226461-
+   347 00000054 74612E62696E220A0A 
+   348 0000005D 546869732064617461-          db   'This data will be send to the web client'
+   349 00000066 2077696C6C20626520-
+   350 0000006F 73656E6420746F2074-
+   351 00000078 68652077656220636C-
+   352 00000081 69656E74           
+   353 00000085 546869732064617461-          db   'This data is send to the web client as a file named data.bin'
+   354 0000008E 2069732073656E6420-
+   355 00000097 746F20746865207765-
+   356 000000A0 6220636C69656E7420-
+   357 000000A9 617320612066696C65-
+   358 000000B2 206E616D6564206461-
+   359 000000BB 74612E62696E       
+   360                                  reply.length: equ $-reply     
+   361                                  
+   362                                  section .text
+   363                                      global _start
+   364                                      
+   365                                  _start:
+   366                                  
+   367 00000000 B801000000                   mov       rax, SYS_WRITE
+   368 00000005 48BE-                        mov       rsi, reply
+   369 00000007 [0000000000000000] 
+   370 0000000F BAC1000000                   mov       rdx, reply.length
+   371 00000014 BF01000000                   mov       rdi, STDOUT
+   372 00000019 0F05                         syscall
+   373                                  
+   374 0000001B BF01000000                   mov       rdi, STDOUT               ; flush STDOUT, Apache can reset the connection otherwise.
+   375 00000020 B803000000                   mov       rax, SYS_CLOSE
+   376 00000025 0F05                         syscall
+   377                                  
+   378 00000027 4831FF                       xor       rdi, rdi
+   379 0000002A B83C000000                   mov       rax, SYS_EXIT
+   380 0000002F 0F05                         syscall
