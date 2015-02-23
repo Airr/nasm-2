@@ -2,8 +2,11 @@
 ; Build       : see makefile
 ; Run         : ./firstwindow
 ; Description : a simple window with the basic functionalities and a title
+
 ; for this program to link you need sudo apt-get install gtk+-3.0-dev
 ; this will install libgtk3-dev and a lot more development libraries.
+
+; C - source : http://zetcode.com/tutorials/gtktutorial/firstprograms/
 
 bits 64
 

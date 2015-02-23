@@ -8,6 +8,8 @@
 
 ; when copying the linked application to another location you need to copy the image file 'logo.png' with it in the same directory.
 ; If you want to change the logo.png file with another picture, just overwrite the logo.png file with the new picture.
+;
+; C - source : http://zetcode.com/tutorials/gtktutorial/firstprograms/
 
 bits 64
 
