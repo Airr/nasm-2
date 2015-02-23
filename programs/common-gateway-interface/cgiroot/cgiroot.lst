@@ -1,88 +1,100 @@
-     1                                  ;***********************************************************************************************
-     2                                  ; name:         cgiroot.asm
-     3                                  ;
-     4                                  ; description:  returns the cgi root directory in a webpage. The program is the same as cwd.asm
-     5                                  ;               wich returns the current working directory.  Because this program runs in the cgi
-     6                                  ;               directory it returns the cgiroot directory.
-     7                                  ;
-     8                                  ; build:        nasm -f elf64 -o cgiroot.o cgiroot.asm -l cgiroot.list
-     9                                  ;               ld cgiroot.o -o cgiroot
-    10                                  ;***********************************************************************************************
-    11                                  BITS 64
-    12                                  ALIGN 8
-    13                                  
-   411                                        [list -]
-   412                                        
-   413                                  section .bss
-   414                                  
-   415 00000000 <res 00000008>                heapstart:        resq 1
-   416                                             
-   417                                  section .data
-   418 00000000 436F6E74656E742D74-           httpheader:       db  "Content-type: text/html",10,10
-   419 00000009 7970653A2074657874-
-   420 00000012 2F68746D6C0A0A     
-   421                                        .length:          equ $-httpheader
-   422 00000019 4572726F7220353030-           errorNoMemory:    db  "Error 500: Internal Server Error"
-   423 00000022 3A20496E7465726E61-
-   424 0000002B 6C2053657276657220-
-   425 00000034 4572726F72         
-   426                                        .length:          equ $-errorNoMemory
-   427                                        
-   428                                  section .text
-   429                                          global _start       
-   430                                  _start:
-   431 00000000 48BE-                           mov     rsi, httpheader
-   432 00000002 [0000000000000000] 
-   433 0000000A BA19000000                      mov     rdx, httpheader.length
-   434 0000000F E892000000                      call    write                
-   435 00000014 4831FF                          xor     rdi, rdi                        ; rdi = 0
-   436 00000017 B80C000000                      mov     rax, SYS_BRK                    ; get start of heap
-   437 0000001C 0F05                            syscall
-   438 0000001E 4821C0                          and     rax, rax                        ; if rax < 0 then no memory available
-   439 00000021 7863                            js      error                           ; no more memory available
-   440 00000023 48890425[00000000]              mov     QWORD[heapstart], rax           ; save the current memory break
-   441                                          
-   442                                          ; reserve memory with chunks of 16 bytes, until the current working directory fits in the
-   443                                          ; created buffer or until there is no more memory available (should not may occur)
-   444                                  repeat: 
-   445 0000002B 4889C7                          mov     rdi, rax                        ; set in RDI
-   446 0000002E 4883C710                        add     rdi, 16                         ; add 16 bytes to the current memory break
-   447 00000032 B80C000000                      mov     rax, SYS_BRK
-   448 00000037 0F05                            syscall                                 ; try to allocate 16 bytes
-   449 00000039 4839C7                          cmp     rdi, rax                        ; RAX == new memory break?
-   450 0000003C 7548                            jne     error                           ; no more memory available to allocate
-   451 0000003E 482B3C25[00000000]              sub     rdi, QWORD[heapstart]           ; size = end in RDI - start in [heapstart]
-   452 00000046 4889FE                          mov     rsi, rdi                        ; size of allocated memory
-   453 00000049 488B3C25[00000000]              mov     rdi, QWORD[heapstart]           ; start of allocated memory
-   454 00000051 B84F000000                      mov     rax, SYS_GETCWD                 ; get the current working directory
-   455 00000056 0F05                            syscall
-   456 00000058 4821C0                          and     rax, rax
-   457 0000005B 7908                            jns     printcwd                        ; if no sign then the cwd is succesfully read
-   458 0000005D 4889F8                          mov     rax, rdi                        ; buffer not large enough rax = [heapstart]
-   459 00000060 4801F0                          add     rax, rsi                        ; heapstart + size of already allocated memory -> new memory break
-   460 00000063 EBC6                            jmp     repeat                          ; retry allocating more memory
-   461                                  printcwd:
-   462 00000065 4889C2                          mov     rdx, rax                        ; save length
-   463 00000068 488B3425[00000000]              mov     rsi, QWORD[heapstart]           ; pointer to the zero terminated string
-   464 00000070 E831000000                      call    write
-   465                                          
-   466 00000075 488B3C25[00000000]              mov     rdi, QWORD[heapstart]           ; release all allocated memory
-   467 0000007D B80C000000                      mov     rax, SYS_BRK
-   468 00000082 0F05                            syscall        
-   469 00000084 EB16                            jmp     exit                            ; and exit the program
-   470                                  error:
-   471 00000086 48BE-                           mov     rsi, errorNoMemory
-   472 00000088 [1900000000000000] 
-   473 00000090 BA20000000                      mov     rdx, errorNoMemory.length
-   474 00000095 E80C000000                      call    write
-   475 0000009A EB00                            jmp     exit
-   476                                  exit:
-   477 0000009C 4831FF                          xor     rdi, rdi
-   478 0000009F B83C000000                      mov     rax, SYS_EXIT
-   479 000000A4 0F05                            syscall
-   480                                  write:
-   481 000000A6 4831FF                          xor     rdi, rdi
-   482 000000A9 48FFC7                          inc     rdi                             ; short method for rdi = STDOUT
-   483 000000AC 4889F8                          mov     rax, rdi                        ; rax = syscall write
-   484 000000AF 0F05                            syscall
-   485 000000B1 C3                              ret
+     1                                  ; name:         getcgiroot.asm
+     2                                  ;
+     3                                  ; description:  returns the cgi root directory in a webpage. The program is the same as cwd.asm
+     4                                  ;               wich returns the current working directory.  Because this program runs in the cgi
+     5                                  ;               directory it returns the cgiroot directory.
+     6                                  ;
+     7                                  ; build:        nasm -f elf64 -o cgiroot.o cgiroot.asm -l cgiroot.list
+     8                                  ;               ld cgiroot.o -o cgiroot
+     9                                  
+    10                                  bits 64
+    11                                  align 8
+    12                                  
+   329                                  [list -]
+   330                                        
+   331                                  section .bss
+   332                                  
+   333 00000000 <res 00000008>               heapstart:        resq 1
+   334                                             
+   335                                  section .data
+   336 00000000 436F6E74656E742D74-          httpheader:       db  "Content-type: text/html",10,10
+   337 00000009 7970653A2074657874-
+   338 00000012 2F68746D6C0A0A     
+   339                                       .length:          equ $-httpheader
+   340 00000019 4572726F7220353030-          error500:         db  "Error 500: Internal Server Error", 10        ; this message will be returned to the web client
+   341 00000022 3A20496E7465726E61-
+   342 0000002B 6C2053657276657220-
+   343 00000034 4572726F720A       
+   344                                       .length:          equ $-error500
+   345 0000003A 5B636769726F6F7420-          errorNoMemory:    db  "[cgiroot error] out of memory error", 10     ; this message will be written to the Apache error log
+   346 00000043 6572726F725D206F75-
+   347 0000004C 74206F66206D656D6F-
+   348 00000055 7279206572726F720A 
+   349                                       .length:          equ $-errorNoMemory
+   350                                        
+   351                                  section .text
+   352                                       global _start       
+   353                                  _start:
+   354 00000000 48BE-                        mov     rsi, httpheader
+   355 00000002 [0000000000000000] 
+   356 0000000A BA19000000                   mov     rdx, httpheader.length
+   357 0000000F E8A6000000                   call    write                
+   358 00000014 4831FF                       xor     rdi, rdi                        ; rdi = 0
+   359 00000017 B80C000000                   mov     rax, SYS_BRK                    ; get start of heap
+   360 0000001C 0F05                         syscall
+   361 0000001E 4821C0                       and     rax, rax                        ; if rax < 0 then no memory available
+   362 00000021 7863                         js      error                           ; no more memory available
+   363 00000023 48890425[00000000]           mov     QWORD[heapstart], rax           ; save the current memory break
+   364                                       
+   365                                       ; reserve memory with chunks of 16 bytes, until the current working directory fits in the
+   366                                       ; created buffer or until there is no more memory available (should not may occur)
+   367                                  repeat: 
+   368 0000002B 4889C7                       mov     rdi, rax                        ; set in RDI
+   369 0000002E 4883C710                     add     rdi, 16                         ; add 16 bytes to the current memory break
+   370 00000032 B80C000000                   mov     rax, SYS_BRK
+   371 00000037 0F05                         syscall                                 ; try to allocate 16 bytes
+   372 00000039 4839C7                       cmp     rdi, rax                        ; RAX == new memory break?
+   373 0000003C 7548                         jne     error                           ; no more memory available to allocate
+   374 0000003E 482B3C25[00000000]           sub     rdi, QWORD[heapstart]           ; size = end in RDI - start in [heapstart]
+   375 00000046 4889FE                       mov     rsi, rdi                        ; size of allocated memory
+   376 00000049 488B3C25[00000000]           mov     rdi, QWORD[heapstart]           ; start of allocated memory
+   377 00000051 B84F000000                   mov     rax, SYS_GETCWD                 ; get the current working directory
+   378 00000056 0F05                         syscall
+   379 00000058 4821C0                       and     rax, rax
+   380 0000005B 7908                         jns     printcwd                        ; if no sign then the cwd is succesfully read
+   381 0000005D 4889F8                       mov     rax, rdi                        ; buffer not large enough rax = [heapstart]
+   382 00000060 4801F0                       add     rax, rsi                        ; heapstart + size of already allocated memory -> new memory break
+   383 00000063 EBC6                         jmp     repeat                          ; retry allocating more memory
+   384                                  printcwd:
+   385 00000065 4889C2                       mov     rdx, rax                        ; save length
+   386 00000068 488B3425[00000000]           mov     rsi, QWORD[heapstart]           ; pointer to the zero terminated string
+   387 00000070 E845000000                   call    write
+   388                                       
+   389 00000075 488B3C25[00000000]           mov     rdi, QWORD[heapstart]           ; release all allocated memory
+   390 0000007D B80C000000                   mov     rax, SYS_BRK
+   391 00000082 0F05                         syscall        
+   392 00000084 EB2A                         jmp     exit                            ; and exit the program
+   393                                  error:
+   394 00000086 48BE-                        mov     rsi, errorNoMemory
+   395 00000088 [3A00000000000000] 
+   396 00000090 BA24000000                   mov     rdx, errorNoMemory.length
+   397 00000095 E82D000000                   call    write.error
+   398 0000009A 48BE-                        mov     rsi, error500
+   399 0000009C [1900000000000000] 
+   400 000000A4 BA21000000                   mov     rdx, error500.length
+   401 000000A9 E80C000000                   call    write
+   402 000000AE EB00                         jmp     exit
+   403                                  exit:
+   404 000000B0 4831FF                       xor     rdi, rdi
+   405 000000B3 B83C000000                   mov     rax, SYS_EXIT
+   406 000000B8 0F05                         syscall    
+   407                                  write:
+   408 000000BA BF01000000                   mov     rdi, STDOUT
+   409 000000BF B801000000                   mov     rax, SYS_WRITE                  ; write to web client
+   410 000000C4 0F05                         syscall
+   411 000000C6 C3                           ret
+   412                                  .error:
+   413 000000C7 BF02000000                   mov     rdi, STDERR                     ; write error to Apache error.log file
+   414 000000CC B801000000                   mov     rax, SYS_WRITE
+   415 000000D1 0F05                         syscall
+   416 000000D3 C3                           ret

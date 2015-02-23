@@ -40,6 +40,8 @@ clean:
 install:
 	$(MAKE) clean
 	$(MAKE)
+	-mkdir $(CGIROOT)downloads
+	cp downloads/logo.png $(CGIROOT)downloads
 	cp $(NAME).html $(WEBROOT)
 	cp $(NAME) $(CGIROOT)
 	
