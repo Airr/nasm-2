@@ -14,10 +14,20 @@
 bits 64
 
 [list -]
-     %include "gtk/gtk.inc"
-     %include "gtk/gobject.inc"
-     %include "gtk/gdk.inc"
-     %include "stdio.inc"
+     %define   GTK_WINDOW_TOPLEVEL   0
+     %define   GTK_WIN_POS_CENTER    1
+     extern    exit
+     extern    gtk_init
+     extern    gtk_window_new
+     extern    gtk_window_set_title
+     extern    gtk_window_set_default_size
+     extern    gtk_window_set_position
+     extern    gtk_window_set_icon
+     extern    gtk_widget_show
+     extern    gtk_main
+     extern    gtk_main_quit
+     extern    g_signal_connect_data
+     extern    gdk_pixbuf_new_from_file
 [list +]
 
 section .bss

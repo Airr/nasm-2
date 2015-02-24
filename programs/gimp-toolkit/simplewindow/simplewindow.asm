@@ -11,9 +11,15 @@
 bits 64
 
 [list -]
-    %include "gtk/gtk.inc"
-    %include "gtk/gobject.inc"
-    %include "stdio.inc"
+    ; don't include entire include files to reduve linked program size.
+    extern     gtk_init
+    extern     gtk_main
+    extern     gtk_main_quit
+    extern     gtk_widget_show
+    extern     gtk_window_new
+    extern     gtk_window_set_title
+    extern     g_signal_connect_data
+    extern     exit
 [list +]
 
 section .bss
