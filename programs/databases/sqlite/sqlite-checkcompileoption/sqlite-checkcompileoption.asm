@@ -5,12 +5,15 @@
 ;              Mostly for diagnostic purposes.  As a demonstration I've added a list of known
 ;              compile options from the website.
 ; See Also:    http://www.sqlite.org/compile.html
+; Note:        For this program to link you need the libsqlite3-dev library.
+;              [sudo apt-get install libsqlite3-dev]
 
 BITS 64
 
 [list -]
-      %include "sqlite3.inc"
-      %include "stdio.inc"
+      extern   printf
+      extern   exit
+      extern   sqlite3_compileoption_used
 [list +]
 
 section .bss
@@ -57,8 +60,8 @@ _start:
     mov     rbx, optionList
 .repeat:    
     mov     rsi, QWORD[rbx]
-    cmp     rsi, 0                              ; end of options list
-    je      Exit
+    and     rsi, rsi                             ; end of options list
+    jz      Exit
     mov     rdi, compileoption
     call    Print
     

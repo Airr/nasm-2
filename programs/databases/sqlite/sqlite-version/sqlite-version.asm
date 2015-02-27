@@ -3,12 +3,16 @@
 ; Run:         ./sqlite-version
 ; Description: Shows version string and number
 ; See also:    http://www.sqlite.org/c3ref/libversion.html
+; Note:        For this program to link you need the libsqlite3-dev library.
+;              [sudo apt-get install libsqlite3-dev]
 
 BITS 64
 
 [list -]
-      %include "sqlite3.inc"
-      %include "stdio.inc"
+      extern sqlite3_libversion
+      extern sqlite3_libversion_number
+      extern printf
+      extern exit
 [list +]
 
 section .bss

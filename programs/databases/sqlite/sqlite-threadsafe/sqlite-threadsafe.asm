@@ -4,12 +4,15 @@
 ; Description: Checks if the sqlite library is threadsafe.
 ;              Diagnostic purposes.
 ; See Also:    http://www.sqlite.org/c3ref/threadsafe.html
+; Note:        For this program to link you need the libsqlite3-dev library.
+;              [sudo apt-get install libsqlite3-dev]
 
 bits 64
 
 [list -]
-      %include "sqlite3.inc"
-      %include "stdio.inc"
+      extern sqlite3_threadsafe
+      extern printf
+      extern exit
 [list +]
 
 section .bss

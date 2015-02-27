@@ -3,12 +3,15 @@
 ; Run:         ./sqlite-compileoptions
 ; Description: Shows the compile options available. Mostly for diagnostic purposes.
 ; See Also:    http://www.sqlite.org/compile.html
+; Note:        For this program to link you need the libsqlite3-dev library.
+;              [sudo apt-get install libsqlite3-dev]
 
-BITS 64
+bits 64
 
 [list -]
-      %include "sqlite3.inc"
-      %include "stdio.inc"
+      extern   printf
+      extern   exit
+      extern   sqlite3_compileoption_get
 [list +]
 
 section .bss
@@ -32,8 +35,8 @@ _start:
 .repeat:    
     push    rdi                         
     call    sqlite3_compileoption_get
-    cmp     rax, 0                      ; if at end of option list end program
-    je      Exit
+    and     rax, rax                    ; if at end of option list end program
+    jz      Exit
     mov     rsi, rax
     mov     rdi, versionformat
     call    Print

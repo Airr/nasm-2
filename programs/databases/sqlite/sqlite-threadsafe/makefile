@@ -8,7 +8,7 @@ INC         = .inc
 LST         = .lst
 
 OBJS = $(NAME)$(O)
-LIBS=-lc --dynamic-linker /lib64/ld-linux-x86-64.so.2 /usr/lib/x86_64-linux-gnu/libsqlite3.so.0
+LIBS=-lc --dynamic-linker /lib64/ld-linux-x86-64.so.2 -lsqlite3
 
 ASFLAGS     = -felf64
 LDFLAGS     = -s -melf_x86_64

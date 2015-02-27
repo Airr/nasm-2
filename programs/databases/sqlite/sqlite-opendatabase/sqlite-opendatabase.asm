@@ -7,12 +7,18 @@
 ; Remark:      To see the error part in action, you can point the databasename to a non-writable
 ;              directory or in general, to a place where you have no permissions to operate.
 ;              If the database isn't present a new database will be made but without the tables.
+; Note:        For this program to link you need the libsqlite3-dev library.
+;              [sudo apt-get install libsqlite3-dev]
 
-BITS 64
+bits 64
 
 [list -]
-      %include "sqlite3.inc"
-      %include "stdio.inc"
+     extern sqlite3_close
+     extern sqlite3_errmsg
+     extern sqlite3_extended_errcode
+     extern sqlite3_open
+     extern printf
+     extern exit
 [list +]
 
 section .bss
@@ -23,7 +29,7 @@ section .data
     
     databaseName:   db "test.sqlite", 0
     notcreated:     db "The database 'test.sqlite' could not be created", 10, 0
-    created:        db "The database 'test.sqlite' is succesfully created", 10, 0
+    opened:         db "The database 'test.sqlite' is succesfully opened", 10, 0
     error:          db "The error returned is: %d - %s.", 10, 0
     website:        db "More info can be found at: "
                     db "http://www.sqlite.org/c3ref/open.html and "
@@ -36,18 +42,18 @@ _start:
         mov     rsi, handle                 ; pointer handle in RSI
         mov     rdi, databaseName           ; databasename in RDI
         call    sqlite3_open                ; open or create if non existing database
-        cmp     rax, SQLITE_OK              ; if RAX is SQLITE_OK then all right
-        je      .created
+        and     rax, rax                    ; if RAX is SQLITE_OK then all right
+        jz      .created
         mov     rdi, notcreated             ; database is not created
         call    Print
         jmp     .error                      ; print the reason
 .created:
-        mov     rdi, created                ; database is created, inform user
+        mov     rdi, opened                 ; database is opened, inform user
         call    Print
         mov     rdi, QWORD[handle]          ; handle in RDI
         call    sqlite3_close               ; close the database
-        cmp     rax, SQLITE_OK              ; if RAX = SQLITE_OK then no problems
-        je      Exit                        ; 
+        and     rax, rax                    ; if RAX = SQLITE_OK then no problems
+        jz      Exit                        ; 
 .error:
         mov     rdi, QWORD[handle]          ; handle in RDI
         call    sqlite3_extended_errcode    ; get extended errorcode
