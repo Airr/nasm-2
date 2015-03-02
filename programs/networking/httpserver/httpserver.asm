@@ -74,7 +74,9 @@ socketerror:            db "socketerror", 10
 .length:                equ $-socketerror
 listenerror:            db "listenerror", 10
 .length:                equ $-listenerror
- 
+
+port:                   db 17,92           ; port 4444 (256 * 17 + 92)
+
 section .text
  
 global _start
@@ -95,7 +97,7 @@ _start:
         xor     r8, r8                   ; clear the value of r8
         mov     r8, INADDR_ANY           ; (INADDR_ANY = 0) - if changed to 100007Fx(IP address : 127.0.0.1) we can only connect locally
         push    r8                       ; push r8 to the stack
-        push    WORD 0x5C11              ; push our port number to the stack (Port = 4444) don't use PUSH WORD 4444 (endianess!)
+        push    WORD [port]              ; push our port number to the stack
         push    WORD AF_INET             ; push protocol argument to the stack (AF_INET = 2)
         mov     QWORD[sock_addr], rsp    ; Save the sock_addr_in
  
