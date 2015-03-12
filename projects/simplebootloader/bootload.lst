@@ -1,0 +1,37 @@
+     1                                  	BITS 16
+     2                                  
+     3                                  start:
+     4 00000000 B8C007                          mov     ax, 07C0h               ; 4K stack
+     5 00000003 052001                          add     ax, (4096+512)/16       ; 
+     6 00000006 FA                              cli                             ; no interrupts now
+     7 00000007 8ED0                            mov     ss, ax
+     8 00000009 BC0010                          mov     sp, 4096
+     9 0000000C FB                              sti
+    10                                          
+    11 0000000D B8C007                          mov     ax, 07C0h
+    12 00000010 8ED8                            mov     ds, ax
+    13                                          
+    14 00000012 B8004F                          mov     ax, 04F00h
+    15 00000015 CD10                            int     10h
+    16 00000017 3C4F                            cmp     al, 04Fh
+    17 00000019 750E                            jne     indefiniteLoop
+    18                                          
+    19 0000001B BE[2B00]                        mov     si, msgWelcome
+    20                                          
+    21 0000001E B40E                            mov     ah, 0Eh
+    22                                          .repeat:
+    23 00000020 AC                              lodsb
+    24 00000021 20C0                            and     al, al
+    25 00000023 7404                            jz      .done
+    26 00000025 CD10                            int     10h
+    27 00000027 EBF7                            jmp     .repeat
+    28                                          .done:
+    29                                  indefiniteLoop:        
+    30 00000029 EBFE                            jmp     $                       ; infinite loop
+    31                                          
+    32 0000002B 54686973206973206D-     msgWelcome:     db      "This is my cool new OS", 10, 13 ,0
+    33 00000034 7920636F6F6C206E65-
+    34 0000003D 77204F530A0D00     
+    35                                  
+    36 00000044 00<rept>                times   510-($-$$)      db 0
+    37 000001FE 55AA                                            dw 0AA55h
