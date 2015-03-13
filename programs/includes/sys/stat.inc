@@ -1,6 +1,22 @@
 %ifndef _ASM_STAT_INC_
 %define _ASM_STAT_INC_
 
+     ; permission en type flags
+     
+     %define   O_RDONLY                0
+     %define   O_WRONLY                1
+     %define   O_RDWR                  2
+     %define   O_ACCMODE               3
+     %define   O_CREAT                64
+     %define   O_EXCL                128
+     #define   O_NOCTTY              256
+     %define   O_TRUNC               512
+     %define   O_APPEND             1024
+
+     %define   O_DIRECTORY         65536 
+     %define   O_NONBLOCK           2048
+     %define   O_NDELAY       O_NONBLOCK
+
      ; File types.
 
      %define   S_IFMT         61440     ; bit mask for the file type bit fields
@@ -14,28 +30,31 @@
      %define   S_ISUID         2048     ; set UID bit
      %define   S_ISGID         1024     ; set-group-ID bit (see below)
      %define   S_ISVTX          512     ; sticky bit (see below)
-     %define   S_IRWXU          448     ; mask for file owner permissions
-     %define   S_IRUSR          256     ; owner has read permission
-     %define   S_IWUSR          128     ; owner has write permission
-     %define   S_IXUSR           64     ; owner has execute permission
-     %define   S_IRWXG           56     ; mask for group permissions
-     %define   S_IRGRP           32     ; group has read permission
-     %define   S_IWGRP           16     ; group has write permission
-     %define   S_IXGRP            8     ; group has execute permission
-     %define   S_IRWXO            7     ; mask for permissions for others (not in group)
-     %define   S_IROTH            4     ; others have read permission
-     %define   S_IWOTH            2     ; others have write permission
-     %define   S_IXOTH            1     ; others have execute permission
-
+    
      ; Protection bits.
 
-     %define   S_ISUID        04000     ; Set user ID on execution.
-     %define   S_ISGID        02000     ; Set group ID on execution.
-     %define   S_ISVTX        01000     ; Save swapped text after use (sticky).
-     %define   S_IREAD         0400     ; Read by owner.
-     %define   S_IWRITE        0200     ; Write by owner.
-     %define   S_IEXEC         0100     ; Execute by owner.
+     %define   S_ISUID        04000                         ; Set user ID on execution.
+     %define   S_ISGID        02000                         ; Set group ID on execution.
+     %define   S_ISVTX        01000                         ; Save swapped text after use (sticky).
+     %define   S_IREAD         0400                         ; Read by owner.
+     %define   S_IWRITE        0200                         ; Write by owner.
+     %define   S_IEXEC         0100                         ; Execute by owner.
+     
+     %define   S_IRUSR        S_IREAD                       ; Read by owner.
+     %define   S_IWUSR        S_IWRITE                      ; Write by owner.
+     %define   S_IXUSR        S_IEXEC                       ; Execute by owner.
+     %define   S_IRWXU        (S_IREAD|S_IWRITE|S_IEXEC)    ; Read, write, and execute by owner.
  
+     %define   S_IRGRP        (S_IRUSR >> 3)                ; Read by group.
+     %define   S_IWGRP        (S_IWUSR >> 3)                ; Write by group.
+     %define   S_IXGRP        (S_IXUSR >> 3)                ; Execute by group.
+     %define   S_IRWXG        (S_IRWXU >> 3)                ; Read, write, and execute by group.
+
+     %define   S_IROTH        (S_IRGRP >> 3)                ; Read by others.
+     %define   S_IWOTH        (S_IWGRP >> 3)                ; Write by others.
+     %define   S_IXOTH        (S_IXGRP >> 3)                ; Execute by others.
+     %define   S_IRWXO        (S_IRWXG >> 3)                ; Read, write, and execute by others.
+
      ; STAT structure definition
 
      STRUC STAT_STRUC
