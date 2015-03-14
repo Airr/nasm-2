@@ -170,6 +170,4 @@ ENDSTRUC
 %endmacro
 
 
-%elif
-  %warning "signals.inc already included"
 %endif

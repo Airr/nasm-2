@@ -9,7 +9,7 @@
      %define   O_ACCMODE               3
      %define   O_CREAT                64
      %define   O_EXCL                128
-     #define   O_NOCTTY              256
+     %define   O_NOCTTY              256
      %define   O_TRUNC               512
      %define   O_APPEND             1024
 
@@ -132,6 +132,4 @@
           %define %1._unused3      %1+STAT_STRUC._unused3
      %endmacro
      
-%elif
-     %warning "stat.inc already included"
 %endif

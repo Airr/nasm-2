@@ -419,6 +419,4 @@
   extern 	g_weak_ref_set
   extern 	_init
 
-%elif
-  %warning "gobject.inc already included"
 %endif

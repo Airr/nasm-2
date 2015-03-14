@@ -4028,6 +4028,4 @@
   extern	gtk_window_unstick
   extern	gtk_wrap_mode_get_type
 
-%elif
-  %warning "gtk.inc already included"
 %endif

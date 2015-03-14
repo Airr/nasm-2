@@ -61,6 +61,4 @@
 ;%define W_EXITCODE(ret, sig)  ((ret) << 8 | (sig))
 ;%define W_STOPCODE(sig)       ((sig) << 8 | 0x7f)
 
-%elif
-  %warning "wait.inc already included"
 %endif

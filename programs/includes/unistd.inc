@@ -309,6 +309,4 @@
 %define STDOUT  1
 %define STDERR  2
 
-%elif
-     %warning "unistd.inc already included" 
 %endif

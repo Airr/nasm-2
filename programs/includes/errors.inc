@@ -276,6 +276,4 @@
   %define   ERFKILL.text                  "Operation not possible due to RF-kill"
   %define   EHWPOISON.text                "Memory page has hardware error"
   
-%elif
-  %warning "errors.inc already included" 
 %endif

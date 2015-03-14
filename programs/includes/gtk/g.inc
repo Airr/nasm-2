@@ -1582,6 +1582,4 @@
   extern 	g_vsprintf
   extern 	g_warn_message
 
-%elif
-  %warning "g.inc already included"
 %endif

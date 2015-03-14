@@ -1441,6 +1441,4 @@
   extern	__xstat
   extern	__xstat64
 
-%elif
-  %warning "stdio.inc already included"
 %endif

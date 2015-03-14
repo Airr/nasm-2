@@ -319,7 +319,5 @@
 %define SQLITE_SYNC_NORMAL        0x00002
 %define SQLITE_SYNC_FULL          0x00003
 %define SQLITE_SYNC_DATAONLY      0x00010
-  
-%elif
-    %warning "sqlite3.inc already included"
+
 %endif

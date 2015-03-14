@@ -120,7 +120,4 @@
   extern	mysql_use_result
   extern	mysql_warning_count
   
-
-%elif
-    %warning "mysqlclient.inc already included"
 %endif

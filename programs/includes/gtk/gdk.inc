@@ -124,6 +124,4 @@
   extern 	gdk_pixdata_serialize
   extern 	gdk_pixdata_to_csource
 
-%elif
-  %warning "gdk.inc already included"
 %endif

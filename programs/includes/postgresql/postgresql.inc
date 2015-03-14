@@ -213,6 +213,4 @@
     %define PQPING_NO_RESPONSE      2   ; could not establish connection
     %define PQPING_NO_ATTEMPT       3   ; connection not attempted (bad params)
  
-%elif
-    %warning "postgresql.inc already included"
 %endif

@@ -58,6 +58,4 @@ ENDSTRUC
     %define %1.tz_dsttime       %1+TIMEZONE_STRUC.tz_dsttime
 %endmacro
 
-%elif
-  %warning "time.inc already included"
 %endif

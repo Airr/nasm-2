@@ -61,6 +61,4 @@ ENDSTRUC
     %define %1.ypixels  %1+WINSIZE_STRUC.ypixels 
 %endmacro
 
-%elif
-    %warning "termio.inc already included"
 %endif
