@@ -9,3 +9,5 @@ NASMENV = -i/[path to homefolder]/Nasm/Includes/
 
 For more information email me : admin@agguro.be (I'm not a company)
 
+updates: 2015-03-14 : include files directory changed
+                      fileio.inc removed, must be replaced by sys/stat.inc
