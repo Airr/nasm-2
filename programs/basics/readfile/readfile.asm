@@ -7,7 +7,7 @@ BITS 64
 
 [list -]
     %include "unistd.inc"
-    %include "fileio.inc"
+    %include "sys/stat.inc"
 [list +]
 
 section .bss
@@ -22,7 +22,7 @@ section .data
     crlf:           db  10
 
     ; file status structure
-    STAT stat
+    STAT stat                                     ; in sys/stat.inc
 
 section .text
 

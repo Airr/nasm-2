@@ -86,7 +86,7 @@ _start:
      or          rsi, rsi                ; done yet?
      jz          .done
      
-     ; RSI contains a pointer to CONTENT_LENGTH the variable we are searching for
+     ; RDI contains a pointer to CONTENT_LENGTH the variable we are searching for
      ; look for the required variable name amongst them
      mov         rcx, requiredVar.length
      mov         rdi, requiredVar

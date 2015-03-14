@@ -11,7 +11,8 @@ BITS 64
 
 [list -]
       %include "unistd.inc"
-      %include "fileio.inc"
+      %include "sys/dirent.inc"
+      %include "sys/stat.inc"
 [list +]
 
 section .bss
