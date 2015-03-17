@@ -16,7 +16,6 @@
         jmp short bootloader_start      ; Jump past disk description section
         nop                             ; Pad out before disk description
 
-
 ; ------------------------------------------------------------------
 ; Disk description table, to make it a valid floppy
 ; Note: some of these values are hard-coded in the source!

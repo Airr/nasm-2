@@ -35,18 +35,18 @@ $(NAME).o : $(NAME).asm
 	$(AS) -f $(TARGET) -o $(NAME).$(TARGET) $(NAME)$(ASM) -l $(NAME)$(LST)
 
 clean:
-	rm -f *$(O) *~ *$(LST) *$(DUMP) $(NAME)
-	rm -rf floppy/
-	rm -rf iso/
-	rm -rf dumps/
-	rm -rf tmp-loop/
+	@rm -rf *$(O) *~ *$(LST) *$(DUMP) $(NAME)
+	@rm -rf floppy/
+	@rm -rf iso/
+	@rm -rf dumps/
+	@rm -rf tmp-loop/
 
 again:
 	touch $(NAME)$(ASM)
 	make
 	
 dump:
-	rm -rf dumps/
+	@rm -rf dumps/
 	mkdir dumps
 	make again
 	hexdump -C $(NAME).$(TARGET) > dumps/$(NAME)$(DUMP)
