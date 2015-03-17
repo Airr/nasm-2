@@ -33,6 +33,7 @@ DUMP        = .dump
 OBJS = $(NAME)$(O)
 $(NAME).o : $(NAME).asm
 	$(AS) -f $(TARGET) -o $(NAME).$(TARGET) $(NAME)$(ASM) -l $(NAME)$(LST)
+	nasm -fbin kernel.asm -o kernel.bin
 
 clean:
 	@rm -rf *$(O) *~ *$(LST) *$(DUMP) $(NAME)
