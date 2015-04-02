@@ -1,15 +1,5 @@
-[list -]
 %ifndef _ASM_UNISTD_INC_
 %define _ASM_UNISTD_INC_
-
-%if __BITS__ == 32
-   %warning "using 32 bits syscalls"
-   %include "unistd32.inc"
-%elif __BITS__ == 64
-   %warning "using 64 bits syscalls"
-   %include "unistd64.inc"
-     
-; this file is deprecated, use only until all sources are updated
 
 %define SYS_ACCEPT                 43
 %define SYS_ACCEPT4                288
@@ -320,8 +310,3 @@
 %define STDERR  2
 
 %endif
-     %define stdout  0
-     %define stdin   1
-     %define stderr  2
-%endif
-[list +]
