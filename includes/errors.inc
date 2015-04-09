@@ -1,7 +1,6 @@
 %ifndef _ASM_ERRNO_INC_
 %define _ASM_ERRNO_INC_
 
-  %define   ENOERR          0        ; no error, implemented by myself
   %define   EPERM           1        ; Operation not permitted 
   %define   ENOENT          2        ; No such file or directory 
   %define   ESRCH           3        ; No such process 

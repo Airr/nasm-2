@@ -5,7 +5,8 @@
 ; SysCall Macro
 ; ---------------------------------
 
-%imacro syscall 1-6.nolist
+%imacro syscall 0-6
+%if %0 > 0
   %if %0 > 1
     %if %0 > 2
       %if %0 > 3
@@ -73,8 +74,10 @@
   %endif
   mov eax, SYS_ %+ %{1}
   int 0x80
+%else
+  int 0x80
+%endif  
 %endmacro
-
 ; ---------------------------------
 ; System Call Listing
 ; ---------------------------------

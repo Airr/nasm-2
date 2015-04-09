@@ -16,6 +16,7 @@
 ; vs. size considerations.
 
 %imacro syscall 0-7.nolist
+%if %0 > 0
   %if %0 > 1
     %if %0 > 2
       %if %0 > 3
@@ -32,7 +33,7 @@
                 %else
                   mov r9, %{7}
                 %endif
-              %elifnidi %{7}, r9
+              %elifnidni %{7}, r9
                 mov r9, %{7}
               %endif
             %endif
@@ -106,10 +107,12 @@
       mov rdi, %{2}
     %endif
   %endif
-
   ; take advantage of sign-extension
   mov eax, SYS_ %+ %{1}
   syscall  ; the opcode, not the macro
+%else
+  syscall  ; again, the opcode, not the macro
+%endif  
 %endmacro
 
 ; ---------------------------------
